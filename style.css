@@ -1,25 +1,28 @@
 /* 定义主题色变量 */
 :root {
-    --primary-color: #1A797F; /* 主题色 */
-    --text-color-light: #333; /* 浅色模式文本 */
-    --bg-color-light: #f5f5f5; /* 浅色模式背景 */
-    --surface-color-light: #fff; /* 浅色模式卡片/输入框背景 */
-    --border-color-light: #ddd; /* 浅色模式边框 */
+    --primary-color: #1A797F; 
+    --text-color-light: #333; 
+    --bg-color-light: #f5f5f5; 
+    --surface-color-light: #fff; 
+    --border-color-light: #ddd; 
 
     /* 默认使用浅色模式 */
     --text-color: var(--text-color-light);
     --bg-color: var(--bg-color-light);
     --surface-color: var(--surface-color-light);
     --border-color: var(--border-color-light);
+    
+    /* 统一所有元素的圆角大小，PC和移动端都使用较大圆角 */
+    --search-radius: 40px; 
 }
 
 /* 深色模式适配 */
 @media (prefers-color-scheme: dark) {
     :root {
-        --text-color-dark: #eee; /* 深色模式文本 */
-        --bg-color-dark: #121212; /* 深色模式背景 */
-        --surface-color-dark: #1e1e1e; /* 深色模式卡片/输入框背景 */
-        --border-color-dark: #333; /* 深色模式边框 */
+        --text-color-dark: #eee; 
+        --bg-color-dark: #121212; 
+        --surface-color-dark: #1e1e1e; 
+        --border-color-dark: #333; 
 
         --text-color: var(--text-color-dark);
         --bg-color: var(--bg-color-dark);
@@ -53,12 +56,12 @@ body {
     padding: 20px;
 }
 
-/* --- 搜索表单 (PC 样式) --- */
+/* --- 搜索表单 (统一外观) --- */
 .search-form {
-    display: flex;
+    display: flex; /* PC默认使用Flex布局 */
     background-color: var(--surface-color);
     border: 1px solid var(--border-color);
-    border-radius: 40px; 
+    border-radius: var(--search-radius); /* 统一大圆角 */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transition: box-shadow 0.3s, border-color 0.3s;
     overflow: hidden; 
@@ -69,11 +72,12 @@ body {
     box-shadow: 0 4px 16px rgba(26, 121, 127, 0.3); 
 }
 
-/* --- 搜索引擎选择 (PC 样式) --- */
+/* --- 搜索引擎选择 (统一外观) --- */
 .engine-select-group {
     display: flex;
     align-items: center;
     padding-left: 15px;
+    /* PC端保留内部边框，在移动端移除，使UI更整体 */
     border-right: 1px solid var(--border-color);
 }
 
@@ -93,7 +97,7 @@ body {
     outline: none;
 }
 
-/* --- 搜索输入框 (PC 样式) --- */
+/* --- 搜索输入框 (统一外观) --- */
 .search-input {
     flex-grow: 1; 
     border: none;
@@ -104,7 +108,6 @@ body {
     outline: none;
 }
 
-/* 占位符颜色适配 */
 .search-input::placeholder {
     color: var(--text-color);
     opacity: 0.5;
@@ -122,6 +125,8 @@ body {
     font-weight: 500;
     cursor: pointer;
     transition: background-color 0.2s;
+    /* PC端有圆角 */
+    border-radius: 0 var(--search-radius) var(--search-radius) 0;
 }
 
 .search-button:hover {
@@ -135,75 +140,58 @@ body {
 
 
 /* ------------------------------------------------------------------ */
-/* --- 响应式设计（Mobile/iPad 优化: 屏幕宽度 <= 768px） --- */
+/* --- 移动端适配（屏幕宽度 <= 768px）：调整布局和尺寸，保持UI一致 --- */
 /* ------------------------------------------------------------------ */
 @media (max-width: 768px) {
+    /* 保持圆角、背景、阴影等与PC端一致 */
     .search-form {
-        /* 移动端改为一行布局：[select] [input] [button] */
+        /* 移动端使用 Grid 布局实现 [Select] [Input] [Button] 的单行紧凑布局 */
         display: grid;
-        grid-template-areas: 
-            "select input button"; 
+        grid-template-areas: "select input button"; 
         grid-template-columns: auto 1fr auto; 
-        border-radius: 12px; 
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        /* 边框和背景由内部元素承担，使整体更紧凑 */
-        border: none; 
-        background-color: var(--surface-color);
     }
     
-    /* 确保内部元素无默认边框 */
-    .engine-select-group,
-    .search-input,
-    .search-button {
-        border: none !important; 
-    }
-
+    /* 移动端统一移除内部边框，让组件看起来是一个整体 */
     .engine-select-group {
-        grid-area: select;
-        /* 仅在右侧保留分隔线，与输入框分离 */
-        border-right: 1px solid var(--border-color) !important; 
-        padding-left: 15px;
-        height: 100%; 
-        width: auto; 
+        border-right: none !important;
+        /* 保持左侧圆角 */
+        border-radius: var(--search-radius) 0 0 var(--search-radius);
     }
-
-    .icon-search {
-        /* 移动端隐藏图标，使选择框更简洁 */
-        display: none; 
-    }
-
-    .engine-select {
-        font-size: 16px; 
-        padding: 15px 10px 15px 0; /* 调整内边距，使其与输入框高度匹配 */
-    }
-
+    
     .search-input {
-        grid-area: input;
-        padding: 15px 10px; 
+        padding: 15px 10px; /* 调整内边距适应小屏幕 */
         font-size: 16px;
     }
 
+    .engine-select {
+        font-size: 16px;
+        padding: 15px 10px 15px 0; /* 调整内边距 */
+    }
+
+    /* 搜索按钮 (移动端样式) */
     .search-button {
-        grid-area: button;
-        /* 搜索按钮在左侧增加分隔线 */
-        border-left: 1px solid var(--border-color) !important;
-        font-size: 0; /* 隐藏文字 */
+        /* 移动端：隐藏文字，只显示图标 */
+        font-size: 0; 
         padding: 0; 
-        width: 55px; 
+        width: 55px; /* 宽度固定 */
         height: 100%; 
         display: flex;
         justify-content: center;
         align-items: center;
-        background-color: var(--primary-color); /* 覆盖表单背景色 */
+        /* 保持右侧圆角 */
+        border-radius: 0 var(--search-radius) var(--search-radius) 0;
     }
     
     .search-button span {
         font-size: 20px;
-        color: white; /* 确保图标颜色正确 */
         margin: 0;
+        color: white;
     }
-    
-    .search-button:hover {
-        background-color: var(--primary-color);
+}
+
+/* 屏幕更小，隐藏搜索图标让选择器更简洁 */
+@media (max-width: 480px) {
+    .icon-search {
+        display: none;
     }
 }
