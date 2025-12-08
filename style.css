@@ -228,5 +228,8 @@ body {
         
         /* 统一图标的视觉设置 */
         font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24; 
+
+        /* 🚀 核心优化点：使用 transform 属性实现微小左移 */
+        transform: translateX(-2px); /* 向左移动 2 像素 */
     }
 }
