@@ -220,7 +220,7 @@ body {
     .search-button span {
         /* 🚀 协调优化点 2: 明确图标的字体大小，确保清晰可见 */
         font-size: 24px; /* 稍微增大，使其在小按钮中更突出 */
-        margin: 0; /* 移除所有可能的边距干扰 */
+        margin: 0 0 0 1px;
         color: white; /* 确保图标颜色正确 */
         
         /* 🚀 协调优化点 3: 确保图标本身也居中 */
@@ -228,8 +228,6 @@ body {
         
         /* 统一图标的视觉设置 */
         font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24; 
-
-        /* 🚀 核心优化点：使用 transform 属性实现微小左移 */
-        transform: translateX(-2px); /* 向左移动 2 像素 */
+        
     }
 }
