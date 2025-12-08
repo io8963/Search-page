@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('search-input');
     const select = document.getElementById('engine-select');
 
-    // --- 新增函数：更新 Placeholder ---
+    // --- 1. Placeholder 动态更新函数 ---
     function updatePlaceholder() {
         const selectedOption = select.options[select.selectedIndex];
         const engineName = selectedOption.textContent;
@@ -12,15 +12,16 @@ document.addEventListener('DOMContentLoaded', () => {
         input.placeholder = `使用 ${engineName} 搜索...`;
     }
 
-    // 1. 初始化 Placeholder
+    // 初始化 Placeholder
     updatePlaceholder();
     
-    // 2. 监听 select 改变事件，实时更新 Placeholder
+    // 监听 select 改变事件，实时更新 Placeholder
     select.addEventListener('change', updatePlaceholder);
 
 
-    // --- 核心搜索提交逻辑（保持不变）---
+    // --- 2. 核心搜索提交逻辑 ---
     form.addEventListener('submit', (e) => {
+        // 阻止表单默认提交行为
         e.preventDefault(); 
         
         const selectedEngineUrl = select.value;
@@ -34,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const encodedQuery = encodeURIComponent(rawQuery);
         const searchUrl = selectedEngineUrl + encodedQuery;
         
+        // 在新标签页中打开
         window.open(searchUrl, '_blank');
     });
 });
