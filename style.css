@@ -197,23 +197,36 @@ body {
         font-size: 16px;
     }
 
-    /* 搜索按钮（只显示图标） */
     .search-button {
         grid-area: button;
-        border-left: 1px solid var(--border-color); 
-        font-size: 0; 
-        padding: 0; 
-        width: 55px; 
+        /* 确保与输入框的高度对齐 (之前设置为 12px padding，现在按钮也要对齐) */
         height: 100%; 
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        width: 55px; 
+        
+        background-color: var(--primary-color);
         border-radius: 0 var(--search-radius) var(--search-radius) 0;
+        
+        /* 🚀 协调优化点 1: 确保内容垂直和水平居中 */
+        display: flex;
+        justify-content: center; /* 水平居中 */
+        align-items: center; /* 垂直居中 */
+        
+        font-size: 0; /* 隐藏文字 */
+        padding: 0; 
+        border-left: 1px solid var(--border-color); /* 保留分隔线 */
     }
     
+    /* 搜索图标样式 */
     .search-button span {
-        font-size: 20px;
-        margin: 0;
-        color: white;
+        /* 🚀 协调优化点 2: 明确图标的字体大小，确保清晰可见 */
+        font-size: 24px; /* 稍微增大，使其在小按钮中更突出 */
+        margin: 0; /* 移除所有可能的边距干扰 */
+        color: white; /* 确保图标颜色正确 */
+        
+        /* 🚀 协调优化点 3: 确保图标本身也居中 */
+        line-height: 1; 
+        
+        /* 统一图标的视觉设置 */
+        font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24; 
     }
 }
