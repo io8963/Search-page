@@ -5,16 +5,14 @@
     --bg-color-light: #f5f5f5; 
     --surface-color-light: #fff; 
     --border-color-light: #ddd; 
-    --hover-color-light: #f0f0f0; /* 新增：浅色模式下的悬停/激活背景色 */
+    --hover-color-light: #f0f0f0;
 
-    /* 默认使用浅色模式 */
     --text-color: var(--text-color-light);
     --bg-color: var(--bg-color-light);
     --surface-color: var(--surface-color-light);
     --border-color: var(--border-color-light);
     --hover-color: var(--hover-color-light);
     
-    /* 统一所有元素的圆角大小 */
     --search-radius: 40px; 
 }
 
@@ -25,7 +23,7 @@
         --bg-color-dark: #121212; 
         --surface-color-dark: #1e1e1e; 
         --border-color-dark: #333; 
-        --hover-color-dark: #2a2a2a; /* 新增：深色模式下的悬停/激活背景色 */
+        --hover-color-dark: #2a2a2a;
 
         --text-color: var(--text-color-dark);
         --bg-color: var(--bg-color-dark);
@@ -53,7 +51,23 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
-/* --- 搜索容器 & 表单 (统一外观) --- */
+/* --- 图标防抖动通用样式 --- */
+.material-symbols-outlined {
+    width: 1em;
+    height: 1em;
+    font-size: 24px; 
+    overflow: hidden; 
+    white-space: nowrap; 
+    display: inline-flex; /* 保持行内块元素特性 */
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0; 
+    user-select: none;
+    line-height: 1;
+    direction: ltr;
+}
+
+/* --- 搜索容器 & 表单 --- */
 .search-container {
     width: 90%;
     max-width: 800px; 
@@ -62,6 +76,7 @@ body {
 
 .search-form {
     display: flex; 
+    align-items: center; 
     background-color: var(--surface-color);
     border: 1px solid var(--border-color);
     border-radius: var(--search-radius); 
@@ -70,32 +85,29 @@ body {
     overflow: hidden; 
 }
 
-/* 🚀 优化点 1A: 调整聚焦时的柔和阴影 */
 .search-form:focus-within {
     border-color: var(--primary-color);
-    /* 柔和光晕效果：内发光 + 外部柔和阴影 */
     box-shadow: 0 0 0 3px rgba(26, 121, 127, 0.2), 0 4px 16px rgba(0, 0, 0, 0.05); 
 }
 
-/* --- 搜索引擎选择 (PC 样式) --- */
+/* --- 搜索引擎选择 (PC) --- */
 .engine-select-group {
     display: flex;
     align-items: center;
     border-right: 1px solid var(--border-color);
     position: relative; 
     padding-left: 15px; 
-    transition: background-color 0.2s; /* 允许背景色过渡 */
+    transition: background-color 0.2s;
     cursor: pointer;
+    flex-shrink: 0; 
 }
 
-/* 🚀 优化点 2A: 搜索引擎选择区域的交互反馈 */
 .engine-select-group:hover {
     background-color: var(--hover-color);
 }
 .engine-select-group:active {
-    background-color: var(--border-color); /* 按下时颜色更深 */
+    background-color: var(--border-color);
 }
-
 
 .setting-icon {
     color: var(--text-color);
@@ -112,18 +124,19 @@ body {
     cursor: pointer;
     appearance: none; 
     outline: none;
-    opacity: 1; 
 }
 
-/* --- 搜索输入框 (统一外观) --- */
+/* --- 搜索输入框 --- */
 .search-input {
     flex-grow: 1; 
     border: none;
-    padding: 15px 20px;
+    /* 右侧 padding 减少，因为清除按钮有自己的 margin */
+    padding: 15px 5px 15px 20px; 
     font-size: 18px;
     background: transparent;
     color: var(--text-color);
     outline: none;
+    min-width: 0; 
 }
 
 .search-input::placeholder {
@@ -131,40 +144,62 @@ body {
     opacity: 0.5;
 }
 
-/* --- 搜索按钮 (PC 样式) --- */
+/* --- ✨ 修复：清除按钮 (×) 位置 --- */
+.clear-btn {
+    color: var(--text-color);
+    opacity: 0.3;
+    cursor: pointer;
+    font-size: 22px; 
+    padding: 5px;       /* 增加点击热区 */
+    margin-right: 12px; /* 🚀 核心修复：让它离右边的搜索按钮远一点 */
+    transition: opacity 0.2s, color 0.2s;
+    border-radius: 50%; /* 悬停时显示圆形背景可选 */
+}
+
+.clear-btn:hover {
+    opacity: 0.8;
+    color: var(--primary-color);
+    background-color: rgba(0,0,0,0.03); /* 轻微背景反馈 */
+}
+
+/* --- ✨ 修复：搜索按钮对齐 --- */
 .search-button {
     display: flex;
     align-items: center;
+    justify-content: center; /* 水平居中 */
     background-color: var(--primary-color);
     color: white;
     border: none;
-    padding: 0 25px; 
+    padding: 15px 25px; 
     font-size: 18px;
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s; /* 允许形变过渡 */
+    transition: background-color 0.2s, transform 0.1s;
     border-radius: 0 var(--search-radius) var(--search-radius) 0;
+    flex-shrink: 0;
+    gap: 6px; /* 使用 gap 代替 margin，控制文字和图标的间距 */
 }
 
 .search-button:hover {
     background-color: #156268; 
 }
 
-/* 🚀 优化点 2B: 搜索按钮的交互反馈 (按下效果) */
 .search-button:active {
-    background-color: #125458; /* 按下时颜色更深 */
-    transform: scale(0.98); /* 缩小 2%，模拟被按下 */
+    background-color: #125458;
+    transform: scale(0.98);
 }
 
-
 .search-button span {
-    margin-left: 5px;
     font-size: 20px;
+    margin: 0;
+    /* 🚀 核心修复：视觉矫正，微调图标位置 */
+    /* 因为图标字体的基线问题，往往需要向下挪 1px 看起来才和文字水平对齐 */
+    transform: translateY(1px); 
 }
 
 
 /* ------------------------------------------------------------------ */
-/* --- 移动端适配（屏幕宽度 <= 768px） --- */
+/* --- 移动端适配 --- */
 /* ------------------------------------------------------------------ */
 @media (max-width: 768px) {
     .search-form {
@@ -173,26 +208,20 @@ body {
         grid-template-columns: auto 1fr auto; 
     }
     
-    /* 移除内部边框 */
     .engine-select-group,
     .search-input,
     .search-button {
         border: none !important; 
     }
 
-    /* 搜索引擎选择区域 (Select Group) 样式调整为设置图标容器 */
     .engine-select-group {
         grid-area: select;
         border-radius: var(--search-radius) 0 0 var(--search-radius);
         padding-left: 0; 
-        
-        display: flex;
         justify-content: center; 
-        align-items: center;
         width: 45px; 
     }
     
-    /* 移动端设置图标 */
     .setting-icon {
         font-size: 20px; 
         position: absolute; 
@@ -200,32 +229,37 @@ body {
         margin: 0;
     }
     
-    /* 搜索引擎选择器 (Select Dropdown) 样式调整 */
     .engine-select {
         opacity: 0; 
         position: relative;
         z-index: 3; 
-        
         width: 100%;
         height: 100%;
         padding: 0;
         margin: 0;
     }
 
-    /* 搜索引擎选择器在移动端的激活效果 */
     .engine-select-group:active {
-        /* 移动端按下时，图标不变色，只改变背景色 */
         background-color: var(--border-color); 
     }
 
-    /* 输入框调整 */
     .search-input {
         grid-area: input;
-        padding: 12px 10px; 
+        /* 右侧留出空间，防止输入文字跑到清除按钮下面 */
+        padding: 12px 40px 12px 10px; 
         font-size: 16px;
     }
 
-    /* 搜索按钮（只显示图标） */
+    /* ✨ 移动端清除按钮调整 */
+    .clear-btn {
+        grid-area: input; 
+        justify-self: end; 
+        align-self: center; 
+        margin-right: 12px; /* 移动端也增加间距，不贴边 */
+        font-size: 20px;
+        z-index: 5;
+    }
+
     .search-button {
         grid-area: button;
         border-left: 1px solid var(--border-color); 
@@ -233,21 +267,13 @@ body {
         padding: 0; 
         width: 55px; 
         height: 100%; 
-        display: flex;
         justify-content: center;
-        align-items: center;
         border-radius: 0 var(--search-radius) var(--search-radius) 0;
-        
-        /* 确保移动端 active 样式生效 */
-        transition: background-color 0.2s, transform 0.1s; 
     }
     
-    /* 移动端搜索图标的视觉校准 */
     .search-button span {
         font-size: 24px;
-        margin: 0 0 0 1px; /* 视觉校准 */
+        transform: translateY(0); /* 移动端只有图标，不需要文字对齐矫正 */
         color: white;
-        line-height: 1;
-        font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
     }
 }
