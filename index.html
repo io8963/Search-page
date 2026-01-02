@@ -11,25 +11,23 @@
     <main class="search-container">
         <form id="search-form" class="search-form">
             
-            <!-- ✨ 1. 改造后的搜索引擎选择区 (自定义下拉) -->
+            <!-- 自定义搜索引擎选择区 -->
             <div class="engine-select-wrapper" id="engine-trigger">
                 <!-- 显示部分 -->
                 <div class="current-engine">
                     <span class="material-symbols-outlined setting-icon">settings</span>
-                    <!-- 这里用来显示当前选中的引擎名字 -->
                     <span id="current-engine-name">Bing</span>
                 </div>
 
-                <!-- 隐藏的下拉菜单列表 -->
+                <!-- 下拉菜单列表 -->
                 <ul id="engine-menu" class="engine-menu">
-                    <!-- data-url 用于存储搜索链接 -->
                     <li data-name="Bing" data-url="https://www.bing.com/search?q=" class="selected">Bing</li>
                     <li data-name="Google" data-url="https://www.google.com/search?q=">Google</li>
                     <li data-name="Baidu" data-url="https://www.baidu.com/s?wd=">Baidu</li>
                 </ul>
             </div>
             
-            <!-- 2. 输入框 -->
+            <!-- 输入框 -->
             <input 
                 type="text" 
                 id="search-input" 
@@ -39,10 +37,10 @@
                 required
             >
 
-            <!-- 3. 清除按钮 -->
+            <!-- 清除按钮 -->
             <span id="clear-btn" class="material-symbols-outlined clear-btn" style="display: none;">cancel</span>
             
-            <!-- 4. 搜索按钮 -->
+            <!-- 搜索按钮 -->
             <button type="submit" class="search-button">
                 搜索
                 <span class="material-symbols-outlined">search</span>

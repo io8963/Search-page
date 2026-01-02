@@ -2,16 +2,17 @@
 :root {
     --primary-color: #1A797F; 
     --text-color-light: #333; 
-    --bg-color-light: #f5f5f5; 
-    --surface-color-light: #fff; 
-    --border-color-light: #ddd; 
-    --hover-color-light: #f0f0f0;
+    --surface-color-light: rgba(255, 255, 255, 0.75); /* ✨ 半透明背景 */
+    --border-color-light: rgba(255, 255, 255, 0.6);   /* ✨ 半透明边框 */
+    --hover-color-light: rgba(0, 0, 0, 0.05);
+    --shadow-light: 0 8px 32px rgba(31, 38, 135, 0.15); /* ✨ 更柔和的阴影 */
 
+    /* 默认使用浅色模式 */
     --text-color: var(--text-color-light);
-    --bg-color: var(--bg-color-light);
     --surface-color: var(--surface-color-light);
     --border-color: var(--border-color-light);
     --hover-color: var(--hover-color-light);
+    --box-shadow: var(--shadow-light);
     
     --search-radius: 40px; 
 }
@@ -20,16 +21,16 @@
 @media (prefers-color-scheme: dark) {
     :root {
         --text-color-dark: #eee; 
-        --bg-color-dark: #121212; 
-        --surface-color-dark: #1e1e1e; 
-        --border-color-dark: #333; 
-        --hover-color-dark: #2a2a2a;
+        --surface-color-dark: rgba(30, 30, 30, 0.75); /* ✨ 深色半透明 */
+        --border-color-dark: rgba(255, 255, 255, 0.1); 
+        --hover-color-dark: rgba(255, 255, 255, 0.1);
+        --shadow-dark: 0 8px 32px rgba(0, 0, 0, 0.4);
 
         --text-color: var(--text-color-dark);
-        --bg-color: var(--bg-color-dark);
         --surface-color: var(--surface-color-dark);
         --border-color: var(--border-color-dark);
         --hover-color: var(--hover-color-dark);
+        --box-shadow: var(--shadow-dark);
     }
 }
 
@@ -42,13 +43,22 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background-color: var(--bg-color);
     color: var(--text-color);
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    transition: background-color 0.3s, color 0.3s;
+    transition: background 0.3s, color 0.3s;
+    
+    /* ✨ 新增：渐变极光背景，为了体现磨砂效果 */
+    background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); 
+}
+
+/* 深色模式背景 */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    }
 }
 
 /* 图标防抖动通用样式 */
@@ -67,34 +77,46 @@ body {
     direction: ltr;
 }
 
-/* --- 搜索容器 & 表单 --- */
+/* --- 搜索容器 --- */
 .search-container {
     width: 90%;
     max-width: 800px; 
     padding: 20px;
 }
 
+/* --- 核心：搜索表单（磨砂玻璃 + 呼吸动画） --- */
 .search-form {
     display: flex; 
     align-items: center; 
+    
+    /* ✨ 磨砂玻璃效果核心代码 */
     background-color: var(--surface-color);
+    backdrop-filter: blur(12px); /* 模糊背景 */
+    -webkit-backdrop-filter: blur(12px); /* Safari 兼容 */
     border: 1px solid var(--border-color);
+    
     border-radius: var(--search-radius); 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.3s, border-color 0.3s;
-    /* 注意：这里把 overflow: hidden 移除了，因为下拉菜单需要显示在框外面 */
+    box-shadow: var(--box-shadow);
+    
+    /* ✨ 增加 transform 过渡，实现呼吸感 */
+    transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    
     position: relative;
     z-index: 10;
 }
 
+/* ✨ 聚焦时的呼吸动画效果 */
 .search-form:focus-within {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(26, 121, 127, 0.2), 0 4px 16px rgba(0, 0, 0, 0.05); 
+    /* 放大 1.02 倍 */
+    transform: scale(1.02); 
+    /* 阴影加重 */
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
-/* --- ✨ 1. 自定义引擎选择器容器 --- */
+/* --- 引擎选择器容器 --- */
 .engine-select-wrapper {
-    position: relative; /* 为了下拉菜单的绝对定位 */
+    position: relative; 
     height: 100%;
     cursor: pointer;
     border-right: 1px solid var(--border-color);
@@ -112,7 +134,7 @@ body {
     align-items: center;
     padding: 15px 15px 15px 20px;
     color: var(--text-color);
-    gap: 8px; /* 图标和文字的间距 */
+    gap: 8px; 
     font-size: 16px;
     font-weight: 500;
 }
@@ -123,38 +145,38 @@ body {
     opacity: 0.7;
 }
 
-/* --- ✨ 2. 自定义下拉菜单 UI --- */
+/* --- 自定义下拉菜单 UI --- */
 .engine-menu {
-    display: none; /* 默认隐藏 */
+    display: none; 
     position: absolute;
-    top: 115%; /* 在输入框下方一点点 */
+    top: 120%; /* 稍微拉开一点距离 */
     left: 0;
     min-width: 140px;
+    
+    /* 菜单也加上磨砂效果 */
     background-color: var(--surface-color);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border-color);
+    
     border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-    padding: 8px;
+    box-shadow: var(--box-shadow);
+    padding: 6px;
     z-index: 100;
     list-style: none;
     
-    /* 动画初始状态 */
+    /* 动画 */
     opacity: 0;
     transform: translateY(-10px);
     transition: opacity 0.2s, transform 0.2s;
 }
 
-/* 激活状态（由 JS 控制） */
 .engine-menu.active {
     display: block;
-    /* 需要一点时间延迟让 display:block 生效后再加动画，或者用 keyframes，
-       这里为了简单直接用 JS 切换 class，配合简单的显隐即可，
-       如果要丝滑动画，通常配合 visibility 或 animation */
-    animation: menuSlideIn 0.2s forwards;
+    animation: menuFadeIn 0.2s forwards;
 }
 
-@keyframes menuSlideIn {
-    from { opacity: 0; transform: translateY(-10px); }
+@keyframes menuFadeIn {
     to { opacity: 1; transform: translateY(0); }
 }
 
@@ -165,19 +187,22 @@ body {
     color: var(--text-color);
     cursor: pointer;
     font-size: 15px;
-    transition: background-color 0.2s;
+    transition: background-color 0.1s;
     display: flex;
     align-items: center;
+    margin-bottom: 2px;
 }
 
-.engine-menu li:hover {
+/* 鼠标悬停 或 键盘高亮 */
+.engine-menu li:hover,
+.engine-menu li.key-active {
     background-color: var(--hover-color);
     color: var(--primary-color);
 }
 
-/* 选中项高亮 */
+/* 当前选中项 */
 .engine-menu li.selected {
-    background-color: rgba(26, 121, 127, 0.1); /* 主题色的浅色背景 */
+    background-color: rgba(26, 121, 127, 0.1); 
     color: var(--primary-color);
     font-weight: 600;
 }
@@ -250,9 +275,7 @@ body {
     transform: translateY(1px); 
 }
 
-/* ------------------------------------------------------------------ */
 /* --- 移动端适配 --- */
-/* ------------------------------------------------------------------ */
 @media (max-width: 768px) {
     .search-form {
         display: grid;
@@ -271,10 +294,9 @@ body {
         border-radius: var(--search-radius) 0 0 var(--search-radius);
         padding-left: 0; 
         justify-content: center; 
-        width: 55px; /* 稍微加宽一点 */
+        width: 55px; 
     }
     
-    /* 移动端只显示图标，不显示文字 "Bing" */
     .current-engine {
         padding: 0;
         justify-content: center;
@@ -285,7 +307,6 @@ body {
         display: none;
     }
     
-    /* 移动端菜单位置调整 */
     .engine-menu {
         top: 100%;
         left: 5px;
@@ -309,7 +330,7 @@ body {
 
     .search-button {
         grid-area: button;
-        border-left: 1px solid var(--border-color); 
+        border-left: 1px solid var(--border-color) !important; /* 强制边框显示 */
         font-size: 0; 
         padding: 0; 
         width: 55px; 
