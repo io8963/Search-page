@@ -1,13 +1,32 @@
+/* --- START OF FILE style.css --- */
+
 /* 定义主题色变量 */
 :root {
-    --primary-color: #1A797F; 
-    --text-color-light: #333; 
-    --surface-color-light: rgba(255, 255, 255, 0.75); /* ✨ 半透明背景 */
-    --border-color-light: rgba(255, 255, 255, 0.6);   /* ✨ 半透明边框 */
-    --hover-color-light: rgba(0, 0, 0, 0.05);
-    --shadow-light: 0 8px 32px rgba(31, 38, 135, 0.15); /* ✨ 更柔和的阴影 */
+    /* 主题色 */
+    --primary-color-light: #1A797F;
+    --primary-color-dark: #4FD1C5; 
+    --primary-color: var(--primary-color-light);
 
-    /* 默认使用浅色模式 */
+    /* 按钮文字颜色 */
+    --btn-text-color-light: #ffffff;
+    --btn-text-color-dark: #0f172a; 
+    --btn-text-color: var(--btn-text-color-light);
+
+    /* 浅色模式变量 */
+    --text-color-light: #333; 
+    --surface-color-light: rgba(255, 255, 255, 0.70); 
+    --border-color-light: rgba(255, 255, 255, 0.6);   
+    --hover-color-light: rgba(0, 0, 0, 0.05);
+    --shadow-light: 0 8px 32px rgba(31, 38, 135, 0.10);
+    
+    /* 占位符透明度 */
+    --placeholder-opacity: 0.5;
+    
+    /* 文本选中背景色 (默认浅色) */
+    --selection-bg: rgba(26, 121, 127, 0.2);
+    --selection-text: #1A797F;
+
+    /* 默认映射 */
     --text-color: var(--text-color-light);
     --surface-color: var(--surface-color-light);
     --border-color: var(--border-color-light);
@@ -15,16 +34,40 @@
     --box-shadow: var(--shadow-light);
     
     --search-radius: 40px; 
+    
+    /* 滤镜变量 */
+    --backdrop-blur: 12px;
+    --backdrop-saturate: 100%; 
 }
 
-/* 深色模式适配 */
+/* --- 深色模式适配 --- */
 @media (prefers-color-scheme: dark) {
     :root {
-        --text-color-dark: #eee; 
-        --surface-color-dark: rgba(30, 30, 30, 0.75); /* ✨ 深色半透明 */
-        --border-color-dark: rgba(255, 255, 255, 0.1); 
+        --primary-color: var(--primary-color-dark);
+        --btn-text-color: var(--btn-text-color-dark);
+        --text-color-dark: #ffffff; 
+        
+        /* macOS 风格表面色 */
+        --surface-color-dark: rgba(30, 35, 45, 0.60); 
+        
+        /* 边框高亮 */
+        --border-color-dark: rgba(255, 255, 255, 0.12); 
+        
         --hover-color-dark: rgba(255, 255, 255, 0.1);
-        --shadow-dark: 0 8px 32px rgba(0, 0, 0, 0.4);
+        
+        /* 深色模式阴影 + 内发光 */
+        --shadow-dark: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+        /* macOS 风格滤镜 */
+        --backdrop-blur: 25px;   
+        --backdrop-saturate: 180%; 
+        
+        /* 深色背景下提高占位符可见度 */
+        --placeholder-opacity: 0.7;
+        
+        /* 🛠 修复2：深色模式文本选中色 (高亮背景+深色文字) */
+        --selection-bg: rgba(79, 209, 197, 0.3);
+        --selection-text: #ffffff;
 
         --text-color: var(--text-color-dark);
         --surface-color: var(--surface-color-dark);
@@ -32,6 +75,12 @@
         --hover-color: var(--hover-color-dark);
         --box-shadow: var(--shadow-dark);
     }
+}
+
+/* 🛠 修复2：全局文本选中样式定制 */
+::selection {
+    background-color: var(--selection-bg);
+    color: var(--selection-text);
 }
 
 /* --- 全局样式 --- */
@@ -48,20 +97,53 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    transition: background 0.3s, color 0.3s;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: color 0.5s ease;
     
-    /* ✨ 新增：渐变极光背景，为了体现磨砂效果 */
-    background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); 
+    /* 浅色背景 */
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background-attachment: fixed;
+    position: relative;
+    z-index: 0;
 }
 
-/* 深色模式背景 */
+/* 深色背景 */
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #3a506b 100%);
+    background-attachment: fixed;
+    opacity: 0;
+    transition: opacity 0.6s ease-in-out;
+    pointer-events: none;
+}
+
+/* 噪点纹理 */
+body::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.04; 
+    pointer-events: none;
+}
+
 @media (prefers-color-scheme: dark) {
-    body {
-        background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    body::before {
+        opacity: 1;
     }
 }
 
-/* 图标防抖动通用样式 */
 .material-symbols-outlined {
     width: 1em;
     height: 1em;
@@ -84,37 +166,33 @@ body {
     padding: 20px;
 }
 
-/* --- 核心：搜索表单（磨砂玻璃 + 呼吸动画） --- */
+/* --- 搜索表单 --- */
 .search-form {
     display: flex; 
     align-items: center; 
-    
-    /* ✨ 磨砂玻璃效果核心代码 */
     background-color: var(--surface-color);
-    backdrop-filter: blur(12px); /* 模糊背景 */
-    -webkit-backdrop-filter: blur(12px); /* Safari 兼容 */
-    border: 1px solid var(--border-color);
     
+    /* 动态滤镜 */
+    backdrop-filter: blur(var(--backdrop-blur)) saturate(var(--backdrop-saturate));
+    -webkit-backdrop-filter: blur(var(--backdrop-blur)) saturate(var(--backdrop-saturate));
+    
+    border: 1px solid var(--border-color);
     border-radius: var(--search-radius); 
     box-shadow: var(--box-shadow);
     
-    /* ✨ 增加 transform 过渡，实现呼吸感 */
-    transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     
     position: relative;
     z-index: 10;
 }
 
-/* ✨ 聚焦时的呼吸动画效果 */
 .search-form:focus-within {
     border-color: var(--primary-color);
-    /* 放大 1.02 倍 */
     transform: scale(1.02); 
-    /* 阴影加重 */
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(var(--primary-color), 0.2); 
 }
 
-/* --- 引擎选择器容器 --- */
+/* --- 引擎选择器 --- */
 .engine-select-wrapper {
     position: relative; 
     height: 100%;
@@ -128,7 +206,6 @@ body {
     background-color: var(--hover-color);
 }
 
-/* 显示区域 */
 .current-engine {
     display: flex;
     align-items: center;
@@ -145,27 +222,25 @@ body {
     opacity: 0.7;
 }
 
-/* --- 自定义下拉菜单 UI --- */
+/* --- 下拉菜单 --- */
 .engine-menu {
     display: none; 
     position: absolute;
-    top: 120%; /* 稍微拉开一点距离 */
+    top: 120%;
     left: 0;
     min-width: 140px;
     
-    /* 菜单也加上磨砂效果 */
     background-color: var(--surface-color);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border-color);
+    backdrop-filter: blur(var(--backdrop-blur)) saturate(var(--backdrop-saturate));
+    -webkit-backdrop-filter: blur(var(--backdrop-blur)) saturate(var(--backdrop-saturate));
     
-    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 16px; 
     box-shadow: var(--box-shadow);
     padding: 6px;
     z-index: 100;
     list-style: none;
     
-    /* 动画 */
     opacity: 0;
     transform: translateY(-10px);
     transition: opacity 0.2s, transform 0.2s;
@@ -180,10 +255,9 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* 菜单项 */
 .engine-menu li {
     padding: 10px 15px;
-    border-radius: 8px;
+    border-radius: 10px;
     color: var(--text-color);
     cursor: pointer;
     font-size: 15px;
@@ -193,21 +267,24 @@ body {
     margin-bottom: 2px;
 }
 
-/* 鼠标悬停 或 键盘高亮 */
 .engine-menu li:hover,
 .engine-menu li.key-active {
     background-color: var(--hover-color);
     color: var(--primary-color);
 }
 
-/* 当前选中项 */
 .engine-menu li.selected {
     background-color: rgba(26, 121, 127, 0.1); 
     color: var(--primary-color);
     font-weight: 600;
 }
+@media (prefers-color-scheme: dark) {
+    .engine-menu li.selected {
+        background-color: rgba(79, 209, 197, 0.15);
+    }
+}
 
-/* --- 搜索输入框 --- */
+/* --- 输入框 --- */
 .search-input {
     flex-grow: 1; 
     border: none;
@@ -217,17 +294,18 @@ body {
     color: var(--text-color);
     outline: none;
     min-width: 0; 
+    caret-color: var(--primary-color);
 }
 
 .search-input::placeholder {
     color: var(--text-color);
-    opacity: 0.5;
+    opacity: var(--placeholder-opacity);
 }
 
 /* --- 清除按钮 --- */
 .clear-btn {
     color: var(--text-color);
-    opacity: 0.3;
+    opacity: 0.4; 
     cursor: pointer;
     font-size: 22px; 
     padding: 5px;       
@@ -237,9 +315,9 @@ body {
 }
 
 .clear-btn:hover {
-    opacity: 0.8;
+    opacity: 0.9;
     color: var(--primary-color);
-    background-color: rgba(0,0,0,0.03);
+    background-color: var(--hover-color);
 }
 
 /* --- 搜索按钮 --- */
@@ -247,25 +325,41 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    
     background-color: var(--primary-color);
-    color: white;
+    background-image: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.1) 100%);
+    
+    color: var(--btn-text-color); 
+    
     border: none;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2); 
+    
     padding: 15px 25px; 
     font-size: 18px;
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
+    transition: filter 0.2s, transform 0.1s, color 0.2s;
     border-radius: 0 var(--search-radius) var(--search-radius) 0;
     flex-shrink: 0;
     gap: 6px; 
+    
+    /* 🛠 修复1：浅色模式有阴影 */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* 🛠 修复1：深色模式下去掉文字阴影，防止文字看起来“脏” */
+@media (prefers-color-scheme: dark) {
+    .search-button {
+        text-shadow: none;
+    }
 }
 
 .search-button:hover {
-    background-color: #156268; 
+    filter: brightness(1.1);
 }
 
 .search-button:active {
-    background-color: #125458;
+    filter: brightness(0.95);
     transform: scale(0.98);
 }
 
@@ -330,18 +424,21 @@ body {
 
     .search-button {
         grid-area: button;
-        border-left: 1px solid var(--border-color) !important; /* 强制边框显示 */
+        /* 移动端深色模式下的分割线 */
+        border-left: 1px solid var(--border-color) !important; 
+        
         font-size: 0; 
         padding: 0; 
         width: 55px; 
         height: 100%; 
         justify-content: center;
         border-radius: 0 var(--search-radius) var(--search-radius) 0;
+        box-shadow: none; 
     }
     
     .search-button span {
         font-size: 24px;
         transform: translateY(0);
-        color: white;
+        color: var(--btn-text-color);
     }
 }
