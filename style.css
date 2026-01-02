@@ -2,17 +2,17 @@
 
 /* 定义主题色变量 */
 :root {
-    /* 主题色 */
+    /* 主题色：智能自适应 (浅色稳重，深色高亮) */
     --primary-color-light: #1A797F;
     --primary-color-dark: #4FD1C5; 
     --primary-color: var(--primary-color-light);
 
-    /* 按钮文字颜色 */
+    /* 按钮文字颜色：保证高对比度 */
     --btn-text-color-light: #ffffff;
     --btn-text-color-dark: #0f172a; 
     --btn-text-color: var(--btn-text-color-light);
 
-    /* 浅色模式变量 */
+    /* 浅色模式基础变量 */
     --text-color-light: #333; 
     --surface-color-light: rgba(255, 255, 255, 0.70); 
     --border-color-light: rgba(255, 255, 255, 0.6);   
@@ -22,7 +22,7 @@
     /* 占位符透明度 */
     --placeholder-opacity: 0.5;
     
-    /* 文本选中背景色 (默认浅色) */
+    /* 文本选中背景色 */
     --selection-bg: rgba(26, 121, 127, 0.2);
     --selection-text: #1A797F;
 
@@ -35,37 +35,37 @@
     
     --search-radius: 40px; 
     
-    /* 滤镜变量 */
+    /* 滤镜变量 (浅色默认) */
     --backdrop-blur: 12px;
     --backdrop-saturate: 100%; 
 }
 
-/* --- 深色模式适配 --- */
+/* --- 深色模式适配 (macOS 风格) --- */
 @media (prefers-color-scheme: dark) {
     :root {
         --primary-color: var(--primary-color-dark);
         --btn-text-color: var(--btn-text-color-dark);
         --text-color-dark: #ffffff; 
         
-        /* macOS 风格表面色 */
+        /* 表面色：深灰蓝，低透明度，配合高模糊 */
         --surface-color-dark: rgba(30, 35, 45, 0.60); 
         
-        /* 边框高亮 */
+        /* 边框高亮：模拟光照描边 */
         --border-color-dark: rgba(255, 255, 255, 0.12); 
         
         --hover-color-dark: rgba(255, 255, 255, 0.1);
         
-        /* 深色模式阴影 + 内发光 */
+        /* 阴影：加深阴影 + 内部微弱高光 */
         --shadow-dark: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 
-        /* macOS 风格滤镜 */
+        /* 滤镜：高模糊 + 高饱和度 (Vibrancy) */
         --backdrop-blur: 25px;   
         --backdrop-saturate: 180%; 
         
-        /* 深色背景下提高占位符可见度 */
+        /* 提高深色背景下占位符可见度 */
         --placeholder-opacity: 0.7;
         
-        /* 🛠 修复2：深色模式文本选中色 (高亮背景+深色文字) */
+        /* 深色模式文本选中色 */
         --selection-bg: rgba(79, 209, 197, 0.3);
         --selection-text: #ffffff;
 
@@ -77,7 +77,7 @@
     }
 }
 
-/* 🛠 修复2：全局文本选中样式定制 */
+/* 全局文本选中样式 */
 ::selection {
     background-color: var(--selection-bg);
     color: var(--selection-text);
@@ -97,18 +97,21 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    
+    /* 字体平滑渲染 */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    
     transition: color 0.5s ease;
     
-    /* 浅色背景 */
+    /* 浅色背景：极简冷灰 */
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     background-attachment: fixed;
     position: relative;
     z-index: 0;
 }
 
-/* 深色背景 */
+/* 深色背景：深邃蓝灰 (叠加层) */
 body::before {
     content: "";
     position: absolute;
@@ -120,11 +123,12 @@ body::before {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #3a506b 100%);
     background-attachment: fixed;
     opacity: 0;
-    transition: opacity 0.6s ease-in-out;
+    /* 聚焦时沉浸式过渡 */
+    transition: opacity 0.6s ease-in-out, filter 0.5s ease;
     pointer-events: none;
 }
 
-/* 噪点纹理 */
+/* 全局噪点纹理 (提升质感) */
 body::after {
     content: "";
     position: absolute;
@@ -135,6 +139,7 @@ body::after {
     z-index: -1;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     opacity: 0.04; 
+    transition: opacity 0.5s ease;
     pointer-events: none;
 }
 
@@ -142,6 +147,16 @@ body::after {
     body::before {
         opacity: 1;
     }
+}
+
+/* UX优化：沉浸模式 (Focus Immersion) */
+/* 深色模式：聚焦时背景模糊变暗 */
+body:has(.search-input:focus)::before {
+    filter: brightness(0.85) blur(3px);
+}
+/* 浅色模式：聚焦时减少噪点 */
+body:has(.search-input:focus)::after {
+    opacity: 0.01;
 }
 
 .material-symbols-outlined {
@@ -172,7 +187,7 @@ body::after {
     align-items: center; 
     background-color: var(--surface-color);
     
-    /* 动态滤镜 */
+    /* 动态滤镜核心 */
     backdrop-filter: blur(var(--backdrop-blur)) saturate(var(--backdrop-saturate));
     -webkit-backdrop-filter: blur(var(--backdrop-blur)) saturate(var(--backdrop-saturate));
     
@@ -192,6 +207,17 @@ body::after {
     box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(var(--primary-color), 0.2); 
 }
 
+/* UX优化：错误抖动动画 (Shake) */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); border-color: #ff6b6b; }
+    20%, 40%, 60%, 80% { transform: translateX(4px); border-color: #ff6b6b; }
+}
+
+.search-form.error-shake {
+    animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
 /* --- 引擎选择器 --- */
 .engine-select-wrapper {
     position: relative; 
@@ -200,6 +226,7 @@ body::after {
     border-right: 1px solid var(--border-color);
     border-radius: var(--search-radius) 0 0 var(--search-radius);
     user-select: none;
+    transform-style: preserve-3d;
 }
 
 .engine-select-wrapper:hover {
@@ -209,17 +236,26 @@ body::after {
 .current-engine {
     display: flex;
     align-items: center;
-    padding: 15px 15px 15px 20px;
+    /* 纯文字版回调 padding：左侧稍大，视觉平衡 */
+    padding: 15px 15px 15px 20px; 
     color: var(--text-color);
     gap: 8px; 
     font-size: 16px;
     font-weight: 500;
 }
 
-.setting-icon {
-    font-size: 20px;
-    color: var(--text-color);
-    opacity: 0.7;
+/* 下拉箭头动画 */
+.arrow-icon {
+    font-size: 18px;
+    opacity: 0.5;
+    margin-left: 2px;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.engine-select-wrapper.is-open .arrow-icon {
+    transform: rotate(180deg);
+    color: var(--primary-color);
+    opacity: 1;
 }
 
 /* --- 下拉菜单 --- */
@@ -241,18 +277,41 @@ body::after {
     z-index: 100;
     list-style: none;
     
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: opacity 0.2s, transform 0.2s;
+    /* UX优化：自定义磨砂滚动条 */
+    max-height: 300px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+/* Webkit 滚动条定制 */
+.engine-menu::-webkit-scrollbar { width: 6px; }
+.engine-menu::-webkit-scrollbar-track { background: transparent; }
+.engine-menu::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 20px;
+}
+.engine-menu::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-color);
 }
 
 .engine-menu.active {
     display: block;
-    animation: menuFadeIn 0.2s forwards;
 }
 
-@keyframes menuFadeIn {
-    to { opacity: 1; transform: translateY(0); }
+/* UX优化：交错滑入动画 */
+.engine-menu.active li {
+    animation: itemSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+    transform: translateX(-10px);
+}
+
+.engine-menu.active li:nth-child(1) { animation-delay: 0.05s; }
+.engine-menu.active li:nth-child(2) { animation-delay: 0.1s; }
+.engine-menu.active li:nth-child(3) { animation-delay: 0.15s; }
+
+@keyframes itemSlideIn {
+    to { opacity: 1; transform: translateX(0); }
 }
 
 .engine-menu li {
@@ -278,6 +337,7 @@ body::after {
     color: var(--primary-color);
     font-weight: 600;
 }
+
 @media (prefers-color-scheme: dark) {
     .engine-menu li.selected {
         background-color: rgba(79, 209, 197, 0.15);
@@ -297,9 +357,36 @@ body::after {
     caret-color: var(--primary-color);
 }
 
+/* 隐藏默认清除按钮 */
+.search-input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
 .search-input::placeholder {
     color: var(--text-color);
     opacity: var(--placeholder-opacity);
+}
+
+/* UX优化：快捷键提示 */
+.shortcut-hint {
+    font-size: 12px;
+    color: var(--text-color);
+    opacity: 0.3;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-right: 12px;
+    font-family: monospace;
+    user-select: none;
+    pointer-events: none;
+    display: flex; 
+    align-items: center;
+}
+/* 聚焦或有内容时隐藏提示 */
+.search-form:focus-within .shortcut-hint,
+.search-input:not(:placeholder-shown) ~ .shortcut-hint {
+    display: none;
 }
 
 /* --- 清除按钮 --- */
@@ -328,12 +415,10 @@ body::after {
     
     background-color: var(--primary-color);
     background-image: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.1) 100%);
-    
     color: var(--btn-text-color); 
     
     border: none;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.2); 
-    
     padding: 15px 25px; 
     font-size: 18px;
     font-weight: 500;
@@ -342,15 +427,12 @@ body::after {
     border-radius: 0 var(--search-radius) var(--search-radius) 0;
     flex-shrink: 0;
     gap: 6px; 
-    
-    /* 🛠 修复1：浅色模式有阴影 */
     text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
-/* 🛠 修复1：深色模式下去掉文字阴影，防止文字看起来“脏” */
 @media (prefers-color-scheme: dark) {
     .search-button {
-        text-shadow: none;
+        text-shadow: none; /* 深色模式去除文字阴影保持锐利 */
     }
 }
 
@@ -367,6 +449,28 @@ body::after {
     font-size: 20px;
     margin: 0;
     transform: translateY(1px); 
+}
+
+/* UX优化：加载状态动画 */
+.search-button.is-loading span { display: none; }
+
+.search-button.is-loading::after {
+    content: "";
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: buttonSpin 0.6s linear infinite;
+}
+
+@keyframes buttonSpin {
+    to { transform: rotate(360deg); }
+}
+
+.search-button.is-loading {
+    pointer-events: none;
+    opacity: 0.9;
 }
 
 /* --- 移动端适配 --- */
@@ -400,6 +504,10 @@ body::after {
     #current-engine-name {
         display: none;
     }
+    .arrow-icon {
+        margin-left: 0;
+        font-size: 16px;
+    }
     
     .engine-menu {
         top: 100%;
@@ -411,6 +519,11 @@ body::after {
         grid-area: input;
         padding: 12px 40px 12px 10px; 
         font-size: 16px;
+    }
+    
+    /* 移动端隐藏快捷键提示 */
+    .shortcut-hint {
+        display: none !important;
     }
 
     .clear-btn {
@@ -424,7 +537,7 @@ body::after {
 
     .search-button {
         grid-area: button;
-        /* 移动端深色模式下的分割线 */
+        /* 深色模式下的分割线修复 */
         border-left: 1px solid var(--border-color) !important; 
         
         font-size: 0; 

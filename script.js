@@ -9,9 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuItems = engineMenu.querySelectorAll('li');
 
     let currentSearchUrl = "https://www.bing.com/search?q=";
-    
-    // ✨ 键盘导航变量
-    let activeIndex = -1; // -1 表示没有通过键盘选中任何项
+    let activeIndex = -1; 
 
     // --- 1. 初始化 ---
     const savedEngineName = localStorage.getItem('selectedEngineName');
@@ -19,6 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (savedEngineName && savedEngineUrl) {
         updateEngineState(savedEngineName, savedEngineUrl);
+    } else {
+        // 默认聚焦输入框
+        input.focus();
     }
 
     // --- 核心：更新引擎状态 ---
@@ -27,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSearchUrl = url;
         input.placeholder = `使用 ${name} 搜索...`;
         
+        // 仅处理选中状态，不处理图标
         menuItems.forEach(item => {
             if (item.getAttribute('data-name') === name) {
                 item.classList.add('selected');
@@ -39,115 +41,128 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('selectedEngineUrl', url);
     }
 
-    // --- ✨ 核心：菜单开关控制 (重构) ---
+    // --- 菜单开关 (带箭头动画类) ---
     function toggleMenu(show) {
         if (show) {
             engineMenu.classList.add('active');
-            activeIndex = -1; // 每次打开重置索引
-            // 清除之前的键盘高亮
+            engineTrigger.classList.add('is-open'); 
+            engineTrigger.setAttribute('aria-expanded', 'true');
+            activeIndex = -1; 
             menuItems.forEach(item => item.classList.remove('key-active'));
         } else {
             engineMenu.classList.remove('active');
+            engineTrigger.classList.remove('is-open');
+            engineTrigger.setAttribute('aria-expanded', 'false');
         }
     }
 
-    // --- 交互：点击开关菜单 ---
     engineTrigger.addEventListener('click', (e) => {
         e.stopPropagation();
-        const isActive = engineMenu.classList.contains('active');
-        toggleMenu(!isActive); // 切换状态
+        toggleMenu(!engineMenu.classList.contains('active')); 
     });
 
-    // --- 交互：鼠标点击菜单项 ---
     menuItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.stopPropagation(); 
             const name = item.getAttribute('data-name');
             const url = item.getAttribute('data-url');
             updateEngineState(name, url);
-            toggleMenu(false); // 关闭
+            toggleMenu(false); 
             input.focus();
         });
     });
 
-    // --- ✨ 交互：键盘导航 (新功能) ---
+    // --- 键盘导航菜单 ---
     document.addEventListener('keydown', (e) => {
-        // 只有当菜单打开时，才拦截这些键
         if (engineMenu.classList.contains('active')) {
             const items = Array.from(menuItems);
-            
             if (e.key === 'ArrowDown') {
-                e.preventDefault(); // 防止页面滚动
+                e.preventDefault(); 
                 activeIndex++;
-                if (activeIndex >= items.length) activeIndex = 0; // 循环到底部回顶部
+                if (activeIndex >= items.length) activeIndex = 0; 
                 updateMenuHighlight(items);
-            } 
-            else if (e.key === 'ArrowUp') {
+            } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 activeIndex--;
-                if (activeIndex < 0) activeIndex = items.length - 1; // 循环到顶部到底部
+                if (activeIndex < 0) activeIndex = items.length - 1; 
                 updateMenuHighlight(items);
-            } 
-            else if (e.key === 'Enter') {
+            } else if (e.key === 'Enter') {
                 e.preventDefault();
-                if (activeIndex > -1) {
-                    // 模拟点击当前高亮的项
-                    items[activeIndex].click();
-                } else {
-                    // 如果没选中任何项按回车，就默认关闭菜单
-                    toggleMenu(false);
-                }
-            }
-            else if (e.key === 'Escape') {
+                if (activeIndex > -1) items[activeIndex].click();
+                else toggleMenu(false);
+            } else if (e.key === 'Escape') {
                 toggleMenu(false);
             }
         }
     });
 
-    // 辅助：更新键盘高亮视觉
     function updateMenuHighlight(items) {
         items.forEach((item, index) => {
-            if (index === activeIndex) {
-                item.classList.add('key-active');
-            } else {
-                item.classList.remove('key-active');
-            }
+            if (index === activeIndex) item.classList.add('key-active');
+            else item.classList.remove('key-active');
         });
     }
 
-    // --- 交互：点击空白关闭菜单 ---
-    document.addEventListener('click', () => {
-        toggleMenu(false);
-    });
+    document.addEventListener('click', () => toggleMenu(false));
 
-    // --- 其他原有逻辑 ---
+    // --- 输入框与清除逻辑 ---
     function toggleClearBtn() {
         clearBtn.style.display = input.value.trim().length > 0 ? 'flex' : 'none';
     }
-
-    input.addEventListener('input', toggleClearBtn);
-
-    clearBtn.addEventListener('click', () => {
+    
+    function clearInput() {
         input.value = ''; 
         input.focus();    
         toggleClearBtn(); 
+    }
+
+    input.addEventListener('input', toggleClearBtn);
+    clearBtn.addEventListener('click', clearInput);
+    
+    // 允许键盘操作清除按钮
+    clearBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); clearInput(); }
     });
 
-    // 全局快捷键 "/" 聚焦
+    // --- 全局快捷键逻辑 ---
     document.addEventListener('keydown', (e) => {
+        // "/" 键聚焦
         if (e.key === '/' && document.activeElement !== input) {
             e.preventDefault(); 
             input.focus();      
         }
+        // "Escape" 键清除内容或失焦
+        if (e.key === 'Escape' && document.activeElement === input) {
+            e.preventDefault();
+            if (input.value.length > 0) {
+                clearInput();
+            } else {
+                input.blur(); 
+            }
+        }
     });
 
+    // --- 提交逻辑 (带抖动反馈和加载动画) ---
     form.addEventListener('submit', (e) => {
         e.preventDefault(); 
         const rawQuery = input.value.trim();
+        
+        // 错误反馈：空内容抖动
         if (!rawQuery) {
+            form.classList.add('error-shake');
             input.focus();
+            setTimeout(() => { form.classList.remove('error-shake'); }, 500);
             return; 
         }
-        window.open(currentSearchUrl + encodeURIComponent(rawQuery), '_blank');
+
+        // 加载动画
+        const searchBtn = form.querySelector('.search-button');
+        searchBtn.classList.add('is-loading'); 
+
+        setTimeout(() => {
+            window.open(currentSearchUrl + encodeURIComponent(rawQuery), '_blank');
+            // 重置动画
+            setTimeout(() => { searchBtn.classList.remove('is-loading'); }, 500); 
+        }, 200); 
     });
 });

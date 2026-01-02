@@ -9,39 +9,47 @@
 </head>
 <body>
     <main class="search-container">
-        <form id="search-form" class="search-form">
+        <!-- 添加 role="search" 提升语义化 -->
+        <form id="search-form" class="search-form" role="search">
             
-            <!-- 自定义搜索引擎选择区 -->
-            <div class="engine-select-wrapper" id="engine-trigger">
-                <!-- 显示部分 -->
+            <!-- 搜索引擎选择器 -->
+            <div class="engine-select-wrapper" id="engine-trigger" role="button" aria-haspopup="true" aria-expanded="false" aria-label="切换搜索引擎">
+                <!-- 显示区域 (纯文字 + 箭头) -->
                 <div class="current-engine">
-                    <span class="material-symbols-outlined setting-icon">settings</span>
                     <span id="current-engine-name">Bing</span>
+                    <span class="material-symbols-outlined arrow-icon">expand_more</span>
                 </div>
 
-                <!-- 下拉菜单列表 -->
-                <ul id="engine-menu" class="engine-menu">
-                    <li data-name="Bing" data-url="https://www.bing.com/search?q=" class="selected">Bing</li>
-                    <li data-name="Google" data-url="https://www.google.com/search?q=">Google</li>
-                    <li data-name="Baidu" data-url="https://www.baidu.com/s?wd=">Baidu</li>
+                <!-- 下拉菜单 (纯文字) -->
+                <ul id="engine-menu" class="engine-menu" role="menu">
+                    <li role="menuitem" data-name="Bing" data-url="https://www.bing.com/search?q=" class="selected">Bing</li>
+                    <li role="menuitem" data-name="Google" data-url="https://www.google.com/search?q=">Google</li>
+                    <li role="menuitem" data-name="Baidu" data-url="https://www.baidu.com/s?wd=">Baidu</li>
                 </ul>
             </div>
             
-            <!-- 输入框 -->
+            <!-- 输入框 (键盘适配 + 自动聚焦) -->
             <input 
-                type="text" 
+                type="search" 
                 id="search-input" 
                 class="search-input" 
                 placeholder="搜索..." 
                 autocomplete="off" 
+                inputmode="search"
+                enterkeyhint="search"
                 required
+                aria-label="输入搜索关键词"
+                autofocus
             >
 
-            <!-- 清除按钮 -->
-            <span id="clear-btn" class="material-symbols-outlined clear-btn" style="display: none;">cancel</span>
+            <!-- 快捷键提示 -->
+            <div class="shortcut-hint" aria-hidden="true">/</div>
+
+            <!-- 清除按钮 (可聚焦) -->
+            <span id="clear-btn" class="material-symbols-outlined clear-btn" style="display: none;" role="button" aria-label="清除输入" tabindex="0">cancel</span>
             
             <!-- 搜索按钮 -->
-            <button type="submit" class="search-button">
+            <button type="submit" class="search-button" aria-label="执行搜索">
                 搜索
                 <span class="material-symbols-outlined">search</span>
             </button>
