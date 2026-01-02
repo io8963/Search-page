@@ -51,14 +51,14 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
-/* --- 图标防抖动通用样式 --- */
+/* 图标防抖动通用样式 */
 .material-symbols-outlined {
     width: 1em;
     height: 1em;
     font-size: 24px; 
     overflow: hidden; 
     white-space: nowrap; 
-    display: inline-flex; /* 保持行内块元素特性 */
+    display: inline-flex;
     justify-content: center;
     align-items: center;
     flex-shrink: 0; 
@@ -82,7 +82,9 @@ body {
     border-radius: var(--search-radius); 
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transition: box-shadow 0.3s, border-color 0.3s;
-    overflow: hidden; 
+    /* 注意：这里把 overflow: hidden 移除了，因为下拉菜单需要显示在框外面 */
+    position: relative;
+    z-index: 10;
 }
 
 .search-form:focus-within {
@@ -90,47 +92,100 @@ body {
     box-shadow: 0 0 0 3px rgba(26, 121, 127, 0.2), 0 4px 16px rgba(0, 0, 0, 0.05); 
 }
 
-/* --- 搜索引擎选择 (PC) --- */
-.engine-select-group {
-    display: flex;
-    align-items: center;
-    border-right: 1px solid var(--border-color);
-    position: relative; 
-    padding-left: 15px; 
-    transition: background-color 0.2s;
+/* --- ✨ 1. 自定义引擎选择器容器 --- */
+.engine-select-wrapper {
+    position: relative; /* 为了下拉菜单的绝对定位 */
+    height: 100%;
     cursor: pointer;
-    flex-shrink: 0; 
+    border-right: 1px solid var(--border-color);
+    border-radius: var(--search-radius) 0 0 var(--search-radius);
+    user-select: none;
 }
 
-.engine-select-group:hover {
+.engine-select-wrapper:hover {
     background-color: var(--hover-color);
 }
-.engine-select-group:active {
-    background-color: var(--border-color);
+
+/* 显示区域 */
+.current-engine {
+    display: flex;
+    align-items: center;
+    padding: 15px 15px 15px 20px;
+    color: var(--text-color);
+    gap: 8px; /* 图标和文字的间距 */
+    font-size: 16px;
+    font-weight: 500;
 }
 
 .setting-icon {
-    color: var(--text-color);
-    margin-right: 5px;
     font-size: 20px;
+    color: var(--text-color);
+    opacity: 0.7;
 }
 
-.engine-select {
-    border: none;
-    background: transparent;
+/* --- ✨ 2. 自定义下拉菜单 UI --- */
+.engine-menu {
+    display: none; /* 默认隐藏 */
+    position: absolute;
+    top: 115%; /* 在输入框下方一点点 */
+    left: 0;
+    min-width: 140px;
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    padding: 8px;
+    z-index: 100;
+    list-style: none;
+    
+    /* 动画初始状态 */
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+/* 激活状态（由 JS 控制） */
+.engine-menu.active {
+    display: block;
+    /* 需要一点时间延迟让 display:block 生效后再加动画，或者用 keyframes，
+       这里为了简单直接用 JS 切换 class，配合简单的显隐即可，
+       如果要丝滑动画，通常配合 visibility 或 animation */
+    animation: menuSlideIn 0.2s forwards;
+}
+
+@keyframes menuSlideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 菜单项 */
+.engine-menu li {
+    padding: 10px 15px;
+    border-radius: 8px;
     color: var(--text-color);
-    padding: 15px 5px; 
-    font-size: 16px;
     cursor: pointer;
-    appearance: none; 
-    outline: none;
+    font-size: 15px;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.engine-menu li:hover {
+    background-color: var(--hover-color);
+    color: var(--primary-color);
+}
+
+/* 选中项高亮 */
+.engine-menu li.selected {
+    background-color: rgba(26, 121, 127, 0.1); /* 主题色的浅色背景 */
+    color: var(--primary-color);
+    font-weight: 600;
 }
 
 /* --- 搜索输入框 --- */
 .search-input {
     flex-grow: 1; 
     border: none;
-    /* 右侧 padding 减少，因为清除按钮有自己的 margin */
     padding: 15px 5px 15px 20px; 
     font-size: 18px;
     background: transparent;
@@ -144,29 +199,29 @@ body {
     opacity: 0.5;
 }
 
-/* --- ✨ 修复：清除按钮 (×) 位置 --- */
+/* --- 清除按钮 --- */
 .clear-btn {
     color: var(--text-color);
     opacity: 0.3;
     cursor: pointer;
     font-size: 22px; 
-    padding: 5px;       /* 增加点击热区 */
-    margin-right: 12px; /* 🚀 核心修复：让它离右边的搜索按钮远一点 */
+    padding: 5px;       
+    margin-right: 12px; 
     transition: opacity 0.2s, color 0.2s;
-    border-radius: 50%; /* 悬停时显示圆形背景可选 */
+    border-radius: 50%;
 }
 
 .clear-btn:hover {
     opacity: 0.8;
     color: var(--primary-color);
-    background-color: rgba(0,0,0,0.03); /* 轻微背景反馈 */
+    background-color: rgba(0,0,0,0.03);
 }
 
-/* --- ✨ 修复：搜索按钮对齐 --- */
+/* --- 搜索按钮 --- */
 .search-button {
     display: flex;
     align-items: center;
-    justify-content: center; /* 水平居中 */
+    justify-content: center;
     background-color: var(--primary-color);
     color: white;
     border: none;
@@ -177,7 +232,7 @@ body {
     transition: background-color 0.2s, transform 0.1s;
     border-radius: 0 var(--search-radius) var(--search-radius) 0;
     flex-shrink: 0;
-    gap: 6px; /* 使用 gap 代替 margin，控制文字和图标的间距 */
+    gap: 6px; 
 }
 
 .search-button:hover {
@@ -192,11 +247,8 @@ body {
 .search-button span {
     font-size: 20px;
     margin: 0;
-    /* 🚀 核心修复：视觉矫正，微调图标位置 */
-    /* 因为图标字体的基线问题，往往需要向下挪 1px 看起来才和文字水平对齐 */
     transform: translateY(1px); 
 }
-
 
 /* ------------------------------------------------------------------ */
 /* --- 移动端适配 --- */
@@ -208,54 +260,49 @@ body {
         grid-template-columns: auto 1fr auto; 
     }
     
-    .engine-select-group,
+    .engine-select-wrapper,
     .search-input,
     .search-button {
         border: none !important; 
     }
 
-    .engine-select-group {
+    .engine-select-wrapper {
         grid-area: select;
         border-radius: var(--search-radius) 0 0 var(--search-radius);
         padding-left: 0; 
         justify-content: center; 
-        width: 45px; 
+        width: 55px; /* 稍微加宽一点 */
     }
     
-    .setting-icon {
-        font-size: 20px; 
-        position: absolute; 
-        z-index: 2;
-        margin: 0;
-    }
-    
-    .engine-select {
-        opacity: 0; 
-        position: relative;
-        z-index: 3; 
+    /* 移动端只显示图标，不显示文字 "Bing" */
+    .current-engine {
+        padding: 0;
+        justify-content: center;
         width: 100%;
         height: 100%;
-        padding: 0;
-        margin: 0;
     }
-
-    .engine-select-group:active {
-        background-color: var(--border-color); 
+    #current-engine-name {
+        display: none;
+    }
+    
+    /* 移动端菜单位置调整 */
+    .engine-menu {
+        top: 100%;
+        left: 5px;
+        min-width: 120px;
     }
 
     .search-input {
         grid-area: input;
-        /* 右侧留出空间，防止输入文字跑到清除按钮下面 */
         padding: 12px 40px 12px 10px; 
         font-size: 16px;
     }
 
-    /* ✨ 移动端清除按钮调整 */
     .clear-btn {
         grid-area: input; 
         justify-self: end; 
         align-self: center; 
-        margin-right: 12px; /* 移动端也增加间距，不贴边 */
+        margin-right: 12px; 
         font-size: 20px;
         z-index: 5;
     }
@@ -273,7 +320,7 @@ body {
     
     .search-button span {
         font-size: 24px;
-        transform: translateY(0); /* 移动端只有图标，不需要文字对齐矫正 */
+        transform: translateY(0);
         color: white;
     }
 }

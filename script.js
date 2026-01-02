@@ -1,28 +1,83 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('search-form');
     const input = document.getElementById('search-input');
-    const select = document.getElementById('engine-select');
-    const clearBtn = document.getElementById('clear-btn'); // 获取清除按钮
-
-    // --- 1. 初始化：从本地存储读取上次选择的引擎 ---
-    const savedEngine = localStorage.getItem('selectedEngine');
-    if (savedEngine) {
-        select.value = savedEngine;
-    }
-
-    // --- 2. 界面更新逻辑 ---
-    function updatePlaceholder() {
-        const selectedOption = select.options[select.selectedIndex];
-        const engineName = selectedOption.textContent;
-        
-        // 设置新的 Placeholder
-        input.placeholder = `使用 ${engineName} 搜索...`;
-        
-        // 💾 每次改变都记住用户的选择
-        localStorage.setItem('selectedEngine', select.value);
-    }
+    const clearBtn = document.getElementById('clear-btn');
     
-    // 控制清除按钮的显示与隐藏
+    // 自定义引擎选择器元素
+    const engineTrigger = document.getElementById('engine-trigger');
+    const engineMenu = document.getElementById('engine-menu');
+    const engineNameDisplay = document.getElementById('current-engine-name');
+    const menuItems = engineMenu.querySelectorAll('li');
+
+    // 当前选中的搜索引擎 URL (默认为 Bing)
+    let currentSearchUrl = "https://www.bing.com/search?q=";
+
+    // --- 1. 初始化：从本地存储读取 ---
+    const savedEngineName = localStorage.getItem('selectedEngineName');
+    const savedEngineUrl = localStorage.getItem('selectedEngineUrl');
+
+    if (savedEngineName && savedEngineUrl) {
+        // 更新状态
+        updateEngineState(savedEngineName, savedEngineUrl);
+    }
+
+    // --- 核心函数：更新引擎状态 ---
+    function updateEngineState(name, url) {
+        // 1. 更新显示的文字
+        engineNameDisplay.textContent = name;
+        
+        // 2. 更新 URL 变量
+        currentSearchUrl = url;
+        
+        // 3. 更新 Placeholder
+        input.placeholder = `使用 ${name} 搜索...`;
+        
+        // 4. 更新菜单项的选中样式
+        menuItems.forEach(item => {
+            if (item.getAttribute('data-name') === name) {
+                item.classList.add('selected');
+            } else {
+                item.classList.remove('selected');
+            }
+        });
+
+        // 5. 保存到本地存储
+        localStorage.setItem('selectedEngineName', name);
+        localStorage.setItem('selectedEngineUrl', url);
+    }
+
+    // --- 交互 1: 点击左侧区域，切换菜单显示 ---
+    engineTrigger.addEventListener('click', (e) => {
+        // 阻止冒泡，防止触发 document 的点击关闭事件
+        e.stopPropagation();
+        engineMenu.classList.toggle('active');
+    });
+
+    // --- 交互 2: 点击菜单项 ---
+    menuItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation(); // 阻止冒泡
+            
+            const name = item.getAttribute('data-name');
+            const url = item.getAttribute('data-url');
+            
+            updateEngineState(name, url);
+            
+            // 关闭菜单
+            engineMenu.classList.remove('active');
+            
+            // 聚焦输入框
+            input.focus();
+        });
+    });
+
+    // --- 交互 3: 点击页面其他地方关闭菜单 ---
+    document.addEventListener('click', () => {
+        engineMenu.classList.remove('active');
+    });
+
+    // --- 其他原有逻辑 (清除按钮、提交、快捷键) ---
+    
     function toggleClearBtn() {
         if (input.value.trim().length > 0) {
             clearBtn.style.display = 'flex';
@@ -31,40 +86,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 初始化执行
-    updatePlaceholder();
-    // 页面加载自动聚焦输入框
-    input.focus();
-
-    // --- 3. 事件监听 ---
-    
-    // 监听 select 改变
-    select.addEventListener('change', updatePlaceholder);
-
-    // 监听输入框内容变化 (输入时判断是否显示清除按钮)
     input.addEventListener('input', toggleClearBtn);
 
-    // 监听清除按钮点击
     clearBtn.addEventListener('click', () => {
-        input.value = ''; // 清空内容
-        input.focus();    // 重新聚焦
-        toggleClearBtn(); // 隐藏按钮
+        input.value = ''; 
+        input.focus();    
+        toggleClearBtn(); 
     });
 
-    // 监听全局快捷键 "/"
     document.addEventListener('keydown', (e) => {
-        // 如果当前没有聚焦在输入框，且按下了 "/" 键
         if (e.key === '/' && document.activeElement !== input) {
-            e.preventDefault(); // 阻止默认的输入 "/" 行为
-            input.focus();      // 聚焦输入框
+            e.preventDefault(); 
+            input.focus();      
         }
     });
 
-    // 监听表单提交
     form.addEventListener('submit', (e) => {
         e.preventDefault(); 
         
-        const selectedEngineUrl = select.value;
         const rawQuery = input.value.trim();
         
         if (!rawQuery) {
@@ -73,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         const encodedQuery = encodeURIComponent(rawQuery);
-        const searchUrl = selectedEngineUrl + encodedQuery;
+        const searchUrl = currentSearchUrl + encodedQuery;
         
         window.open(searchUrl, '_blank');
     });

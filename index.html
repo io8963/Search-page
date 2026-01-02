@@ -5,37 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>简约搜索主页</title>
     <link rel="stylesheet" href="style.css">
-    <!-- ✨ 修改：URL末尾添加了 &display=block，防止加载时显示文字乱码 -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" />
 </head>
 <body>
     <main class="search-container">
         <form id="search-form" class="search-form">
             
-            <!-- 搜索引擎选择 -->
-            <div class="engine-select-group">
-                <span class="material-symbols-outlined setting-icon">settings</span> 
-                <select id="engine-select" class="engine-select">
-                    <option value="https://www.bing.com/search?q=" selected>Bing</option>
-                    <option value="https://www.google.com/search?q=">Google</option>
-                    <option value="https://www.baidu.com/s?wd=">Baidu</option>
-                </select>
+            <!-- ✨ 1. 改造后的搜索引擎选择区 (自定义下拉) -->
+            <div class="engine-select-wrapper" id="engine-trigger">
+                <!-- 显示部分 -->
+                <div class="current-engine">
+                    <span class="material-symbols-outlined setting-icon">settings</span>
+                    <!-- 这里用来显示当前选中的引擎名字 -->
+                    <span id="current-engine-name">Bing</span>
+                </div>
+
+                <!-- 隐藏的下拉菜单列表 -->
+                <ul id="engine-menu" class="engine-menu">
+                    <!-- data-url 用于存储搜索链接 -->
+                    <li data-name="Bing" data-url="https://www.bing.com/search?q=" class="selected">Bing</li>
+                    <li data-name="Google" data-url="https://www.google.com/search?q=">Google</li>
+                    <li data-name="Baidu" data-url="https://www.baidu.com/s?wd=">Baidu</li>
+                </ul>
             </div>
             
-            <!-- 输入框 -->
+            <!-- 2. 输入框 -->
             <input 
                 type="text" 
                 id="search-input" 
                 class="search-input" 
-                placeholder="" 
+                placeholder="搜索..." 
                 autocomplete="off" 
                 required
             >
 
-            <!-- 清除按钮 -->
+            <!-- 3. 清除按钮 -->
             <span id="clear-btn" class="material-symbols-outlined clear-btn" style="display: none;">cancel</span>
             
-            <!-- 搜索按钮 -->
+            <!-- 4. 搜索按钮 -->
             <button type="submit" class="search-button">
                 搜索
                 <span class="material-symbols-outlined">search</span>
