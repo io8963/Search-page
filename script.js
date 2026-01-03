@@ -11,7 +11,17 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSearchUrl = "https://www.bing.com/search?q=";
     let activeIndex = -1; 
 
-    // --- 1. 初始化引擎状态 ---
+    // --- 1. 直达功能配置 ---
+    const directShortcuts = {
+        'gh': 'https://github.com/search?q=',
+        'yt': 'https://www.youtube.com/results?search_query=',
+        'bili': 'https://search.bilibili.com/all?keyword=',
+        'wiki': 'https://zh.wikipedia.org/wiki/',
+        'z': 'https://www.zhihu.com/search?q=',
+        'db': 'https://www.douban.com/search?q='
+    };
+
+    // --- 2. 初始化引擎状态 ---
     const savedEngineName = localStorage.getItem('selectedEngineName');
     const savedEngineUrl = localStorage.getItem('selectedEngineUrl');
 
@@ -36,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('selectedEngineUrl', url);
     }
 
-    // --- 2. 菜单开关逻辑 ---
+    // --- 3. 菜单开关逻辑 ---
     function toggleMenu(show) {
         if (show) {
             engineMenu.classList.add('active');
@@ -67,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- 3. 键盘与全局点击 ---
+    // --- 4. 键盘与全局点击 ---
     document.addEventListener('keydown', (e) => {
         if (engineMenu.classList.contains('active')) {
             const items = Array.from(menuItems);
@@ -101,10 +111,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('click', () => toggleMenu(false));
 
-    // --- 4. 输入框清除逻辑 ---
+    // --- 5. 输入框监听 (清除按钮 & 直达模式视觉反馈) ---
+    const checkDirectMode = (val) => {
+        const query = val.trim();
+        const parts = query.split(' ');
+        const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+        
+        if (urlPattern.test(query) || (parts.length > 1 && directShortcuts[parts[0].toLowerCase()])) {
+            form.classList.add('direct-mode');
+        } else {
+            form.classList.remove('direct-mode');
+        }
+    };
+
     const toggleClearBtn = () => {
         const hasText = input.value.length > 0;
         clearBtn.classList.toggle('visible', hasText);
+        checkDirectMode(input.value);
     };
     
     const clearInput = () => {
@@ -118,17 +141,39 @@ document.addEventListener('DOMContentLoaded', () => {
     
     toggleClearBtn();
 
-    // --- 5. 提交搜索 ---
+    // --- 6. 提交搜索逻辑 (核心直达逻辑) ---
     form.addEventListener('submit', (e) => {
         e.preventDefault(); 
         const query = input.value.trim();
         if (!query) return;
 
         const searchBtn = form.querySelector('.search-button');
-        searchBtn.classList.add('is-loading'); 
+        searchBtn.classList.add('is-loading');
 
+        let targetUrl = "";
+
+        // A. 判定是否为纯网址直达
+        const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+        if (urlPattern.test(query)) {
+            targetUrl = query.startsWith('http') ? query : `https://${query}`;
+        } 
+        else {
+            // B. 判定是否为快捷键直达 (例如 "gh react")
+            const parts = query.split(' ');
+            const prefix = parts[0].toLowerCase();
+            if (directShortcuts[prefix] && parts.length > 1) {
+                const keyword = query.substring(parts[0].length).trim();
+                targetUrl = directShortcuts[prefix] + encodeURIComponent(keyword);
+            } 
+            else {
+                // C. 普通搜索
+                targetUrl = currentSearchUrl + encodeURIComponent(query);
+            }
+        }
+
+        // 执行跳转
         setTimeout(() => {
-            window.open(currentSearchUrl + encodeURIComponent(query), '_blank');
+            window.open(targetUrl, '_blank');
             searchBtn.classList.remove('is-loading');
         }, 300); 
     });

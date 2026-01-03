@@ -2,6 +2,7 @@
     --primary-color-light: #1A797F;
     --primary-color-dark: #4FD1C5; 
     --primary-color: var(--primary-color-light);
+    --direct-color: #f6ad55; /* 直达模式的颜色（橙色） */
     --btn-text-color: #ffffff;
 
     --text-color-light: #333; 
@@ -73,7 +74,6 @@ body::before {
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     position: relative;
     height: 64px;
-    /* 核心修改：确保容器右侧不留间隙 */
     padding-right: 0; 
 }
 
@@ -81,6 +81,18 @@ body::before {
     border-color: var(--primary-color);
     transform: scale(1.01); 
     box-shadow: 0 15px 45px rgba(0, 0, 0, 0.1);
+}
+
+/* 直达模式状态：改变边框和光标色 */
+.search-form.direct-mode {
+    border-color: var(--direct-color);
+    box-shadow: 0 15px 45px rgba(246, 173, 85, 0.15);
+}
+.search-form.direct-mode .search-input {
+    caret-color: var(--direct-color);
+}
+.search-form.direct-mode .search-button {
+    background-color: var(--direct-color);
 }
 
 input[type="search"]::-webkit-search-decoration,
@@ -245,7 +257,7 @@ input[type="search"]::-webkit-search-results-decoration {
     background-color: var(--hover-color); 
 }
 
-/* --- 核心优化：搜索按钮覆盖逻辑 --- */
+/* 搜索按钮 */
 .search-button {
     display: flex;
     align-items: center;
@@ -257,26 +269,19 @@ input[type="search"]::-webkit-search-results-decoration {
     font-size: 18px;
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
+    transition: all 0.2s;
     
-    /* 使用负边距和高度微调，完全覆盖父容器 1px 边框带来的重影 */
     height: calc(100% + 2px); 
     margin: -1px -1px -1px 0;
     border-radius: 0 var(--search-radius) var(--search-radius) 0;
     
     flex-shrink: 0;
     gap: 6px; 
-    z-index: 1; /* 确保它在容器边框上方 */
+    z-index: 1; 
 }
 
-.search-button:hover {
-    background-color: #156268; 
-}
-
-.search-button:active {
-    background-color: #125458;
-    transform: scale(0.98);
-}
+.search-button:hover { background-color: #156268; }
+.search-button:active { transform: scale(0.98); }
 
 .search-button span {
     font-size: 20px;
@@ -290,14 +295,13 @@ input[type="search"]::-webkit-search-results-decoration {
     .engine-select-wrapper { border-right: none; width: 50px; }
     .current-engine { padding: 0 0 0 15px; }
     
-    /* 移动端优化：让按钮保持圆形并稍微内收，避免贴边 */
     .search-button { 
         width: 44px; 
         height: 44px; 
         padding: 0; 
         justify-content: center; 
         border-radius: 50%; 
-        margin: 0 6px 0 0; /* 移动端改为间距模式，不强制覆盖边框 */
+        margin: 0 6px 0 0; 
         align-self: center;
     }
     .shortcut-hint { display: none; }
