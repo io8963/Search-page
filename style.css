@@ -720,3 +720,58 @@ input[type="search"]::-webkit-search-results-decoration {
     font-family: monospace;
     font-size: 0.9em;
 }
+
+/* 修复图标撑破布局问题 */
+.material-symbols-outlined {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.arrow-icon {
+    font-size: 18px; 
+    width: 18px;
+    height: 18px;
+    opacity: 0.5;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .arrow-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+    }
+}
+
+.current-engine .material-symbols-outlined {
+    flex-shrink: 0;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.search-button span.material-symbols-outlined {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    transform: translateY(1px); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.clear-btn span {
+    display: block; 
+    line-height: 1; 
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
