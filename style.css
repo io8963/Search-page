@@ -193,6 +193,23 @@ input[type="search"]::-webkit-search-results-decoration {
     align-items: center;
     flex-shrink: 0;
     min-width: 0; /* 允许收缩 */
+    background-color: rgba(0, 0, 0, 0.02);
+    transition: background-color 0.2s ease;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.05);
+    /* 添加圆角以匹配整体表单 */
+    border-radius: var(--search-radius) 0 0 var(--search-radius);
+}
+
+.engine-select-wrapper:hover,
+.engine-select-wrapper.is-open {
+    background-color: var(--hover-color);
+}
+
+@media (prefers-color-scheme: dark) {
+    .engine-select-wrapper {
+        background-color: rgba(255, 255, 255, 0.03);
+        box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.05);
+    }
 }
 
 .current-engine {
@@ -565,29 +582,72 @@ input[type="search"]::-webkit-search-results-decoration {
     }
 }
 
-@media (max-width: 480px) {
-    .search-form {
-        height: 50px;
+@media (max-width: 768px) {
+    .search-form { 
+        height: 56px; 
+        min-height: 56px;
+        /* 确保在直达模式下也能正确显示 */
+        align-items: center;
     }
     
-    .search-button {
-        width: 40px;
-        height: 40px;
-        min-width: 40px;
+    #current-engine-name, 
+    .button-text { 
+        display: none; 
     }
     
-    .clear-btn.visible {
-        width: 32px;
-        height: 32px;
+    .engine-select-wrapper { 
+        border-right: none; 
+        width: auto; 
+        min-width: 44px;
+        justify-content: center;
+        /* 移动端时变成圆形，与右侧搜索按钮一致 */
+        border-radius: 50%;
+        margin: 0 6px 0 8px;
+        /* 确保高度和宽度一致 */
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+    }
+    
+    .current-engine { 
+        padding: 0;
+        justify-content: center;
+        /* 调整内部元素的间距 */
+        gap: 0;
+    }
+    
+    .arrow-icon {
+        font-size: 20px; /* 在圆形按钮中稍微大一点 */
+    }
+    
+    .direct-badge { 
+        padding: 0 10px 0 15px; 
+        font-size: 14px;
+    }
+
+    .search-button { 
+        width: 44px; 
+        height: 44px; 
+        padding: 0; 
+        justify-content: center; 
+        border-radius: 50%; 
+        margin: 0 6px 0 0; 
+        align-self: center;
+        min-width: 44px;
+    }
+    
+    .shortcut-hint { 
+        display: none; 
+    }
+    
+    .clear-btn.visible { 
+        margin-right: 5px; 
+        width: 36px;
+        height: 36px;
     }
     
     .search-input {
-        padding: 0 12px;
-        font-size: 16px;
-    }
-    
-    .engine-select-wrapper {
-        min-width: 40px;
+        padding: 0 15px;
     }
 }
 
