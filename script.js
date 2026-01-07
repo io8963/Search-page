@@ -13,10 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const state = {
         currentSearchUrl: "https://www.bing.com/search?q=",
         activeIndex: -1,
+        // 将预设引擎也加入到自定义引擎数组中，以便统一管理
         searchEngines: [
-            { name: 'Bing', url: 'https://www.bing.com/search?q=', domain: 'bing.com' },
-            { name: 'Google', url: 'https://www.google.com/search?q=', domain: 'google.com' },
-            { name: 'Baidu', url: 'https://www.baidu.com/s?wd=', domain: 'baidu.com' }
+            { name: 'Bing', url: 'https://www.bing.com/search?q=', domain: 'bing.com', preset: true },
+            { name: 'Google', url: 'https://www.google.com/search?q=', domain: 'google.com', preset: true },
+            { name: 'Baidu', url: 'https://www.baidu.com/s?wd=', domain: 'baidu.com', preset: true }
         ],
         // 新增：存储用户自定义引擎
         customEngines: []
@@ -45,49 +46,141 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     };
 
-// 替换 script.js 中的 add 函数部分
+    // 替换 script.js 中的 customEngineCommands 部分
     const customEngineCommands = {
-    add: (params) => {
-        if (params.length < 2) {
-            showNotification('用法: /add <名称> <URL模板> [域名]');
-            return;
-        }
-        
-        const name = params[0];
-        const urlTemplate = params[1];
-        const domain = params[2] || extractDomain(urlTemplate);
-        
-        // 验证URL格式 - 允许使用 {query} 或其他占位符
-        if (!urlTemplate.includes('{query}')) {
-            showNotification('URL模板必须包含 {query} 占位符');
-            return;
-        }
-        
-        // 尝试创建一个临时URL来验证基本格式
-        const testUrl = urlTemplate.replace(/{query}/g, 'test');
-        try {
-            new URL(testUrl);
-        } catch (e) {
-            showNotification('URL格式不正确');
-            return;
-        }
-        
-        // 检查是否已存在
-        const existingIndex = state.customEngines.findIndex(engine => engine.name === name);
-        if (existingIndex !== -1) {
-            state.customEngines[existingIndex] = { name, url: urlTemplate, domain };
-            showNotification(`搜索引擎 "${name}" 已更新`);
-        } else {
+        add: (params) => {
+            if (params.length < 2) {
+                showNotification('用法: /add <名称> <URL模板> [域名]');
+                return;
+            }
+            
+            const name = params[0];
+            const urlTemplate = params[1];
+            const domain = params[2] || extractDomain(urlTemplate);
+            
+            // 验证URL格式 - 允许使用 {query} 或其他占位符
+            if (!urlTemplate.includes('{query}')) {
+                showNotification('URL模板必须包含 {query} 占位符');
+                return;
+            }
+            
+            // 尝试创建一个临时URL来验证基本格式
+            const testUrl = urlTemplate.replace(/{query}/g, 'test');
+            try {
+                new URL(testUrl);
+            } catch (e) {
+                showNotification('URL格式不正确');
+                return;
+            }
+            
+            // 检查是否已存在（包括预设引擎）
+            const allEngines = getAllEngines();
+            const existingIndex = allEngines.findIndex(engine => engine.name === name);
+            if (existingIndex !== -1) {
+                showNotification(`搜索引擎 "${name}" 已存在`);
+                return;
+            }
+            
             state.customEngines.push({ name, url: urlTemplate, domain });
             showNotification(`已添加搜索引擎 "${name}"`);
-        }
+            
+            saveEnginesToStorage();
+            updateEngineMenu();
+        },
         
-        saveEnginesToStorage();
-        updateEngineMenu();
-    },
-    
-    // ... 其他命令保持不变
-    }
+        remove: (params) => {
+            if (params.length === 0) {
+                showNotification('用法: /remove <名称>');
+                return;
+            }
+            
+            const name = params[0];
+            
+            // 检查所有引擎
+            const allEngines = getAllEngines();
+            if (allEngines.length <= 1) {
+                showNotification('必须至少保留一个搜索引擎');
+                return;
+            }
+            
+            // 检查自定义引擎是否存在
+            const customEngineIndex = state.customEngines.findIndex(engine => engine.name === name);
+            if (customEngineIndex !== -1) {
+                // 删除自定义引擎
+                state.customEngines.splice(customEngineIndex, 1);
+                
+                // 如果当前选中的是要删除的引擎，切换到第一个可用引擎
+                if (engineNameDisplay.textContent === name) {
+                    const firstAvailableEngine = getAllEngines()[0];
+                    updateEngineState(firstAvailableEngine.name, firstAvailableEngine.url);
+                }
+                
+                saveEnginesToStorage();
+                updateEngineMenu();
+                showNotification(`已删除搜索引擎 "${name}"`);
+                return;
+            }
+            
+            // 检查预设引擎是否存在
+            const presetEngineIndex = state.searchEngines.findIndex(engine => engine.name === name);
+            if (presetEngineIndex !== -1) {
+                // 从预设引擎中移除
+                state.searchEngines.splice(presetEngineIndex, 1);
+                
+                // 如果当前选中的是要删除的引擎，切换到第一个可用引擎
+                if (engineNameDisplay.textContent === name) {
+                    const firstAvailableEngine = getAllEngines()[0];
+                    updateEngineState(firstAvailableEngine.name, firstAvailableEngine.url);
+                }
+                
+                saveEnginesToStorage();
+                updateEngineMenu();
+                showNotification(`已删除搜索引擎 "${name}"`);
+                return;
+            }
+            
+            showNotification(`未找到搜索引擎 "${name}"`);
+        },
+        
+        list: () => {
+            const allEngines = getAllEngines();
+            if (allEngines.length === 0) {
+                showNotification('没有可用的搜索引擎');
+                return;
+            }
+            
+            const engineList = allEngines.map(engine => 
+                `- ${engine.name} (${engine.domain}) ${engine.preset ? '[预设]' : '[自定义]'}`
+            ).join('\n');
+            
+            showNotification(`搜索引擎列表：\n\n${engineList}`);
+        },
+        
+        reset: () => {
+            if (confirm('确定要恢复默认搜索引擎吗？这将删除所有自定义引擎并恢复预设引擎。')) {
+                // 恢复预设引擎
+                state.searchEngines = [
+                    { name: 'Bing', url: 'https://www.bing.com/search?q=', domain: 'bing.com', preset: true },
+                    { name: 'Google', url: 'https://www.google.com/search?q=', domain: 'google.com', preset: true },
+                    { name: 'Baidu', url: 'https://www.baidu.com/s?wd=', domain: 'baidu.com', preset: true }
+                ];
+                state.customEngines = [];
+                
+                // 切换到默认引擎
+                const defaultEngine = state.searchEngines[0];
+                updateEngineState(defaultEngine.name, defaultEngine.url);
+                
+                saveEnginesToStorage();
+                updateEngineMenu();
+                showNotification('已恢复默认搜索引擎');
+            }
+        }
+    };
+
+    // 获取所有引擎（预设 + 自定义）
+    const getAllEngines = () => {
+        return [...state.searchEngines, ...state.customEngines];
+    };
 
     // --- 新增：从URL提取域名 ---
     const extractDomain = (url) => {
@@ -100,6 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 新增：保存引擎到本地存储 ---
     const saveEnginesToStorage = () => {
+        // 只保存自定义引擎，预设引擎不需要保存
         localStorage.setItem('customSearchEngines', JSON.stringify(state.customEngines));
     };
 
@@ -117,11 +211,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 新增：更新引擎菜单 ---
     const updateEngineMenu = () => {
-        // 清空现有菜单项（保留预设引擎）
+        // 清空现有菜单项
         engineMenu.innerHTML = '';
         
-        // 添加预设引擎
-        state.searchEngines.forEach((engine, index) => {
+        // 获取所有引擎
+        const allEngines = getAllEngines();
+        
+        // 添加所有引擎
+        allEngines.forEach((engine, index) => {
             const li = document.createElement('li');
             li.setAttribute('role', 'option');
             li.setAttribute('data-name', engine.name);
@@ -136,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
             li.innerHTML = `
                 <div class="engine-info">
                     <span class="engine-main">${engine.name}</span>
-                    <span class="engine-desc">${engine.domain}</span>
+                    <span class="engine-desc">${engine.domain} ${engine.preset ? '(预设)' : '(自定义)'}</span>
                 </div>
             `;
             
@@ -154,56 +251,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             engineMenu.appendChild(li);
         });
-        
-        // 添加自定义引擎分隔线
-        if (state.customEngines.length > 0) {
-            const separator = document.createElement('li');
-            separator.classList.add('menu-separator');
-            separator.innerHTML = '<div class="separator-line">自定义引擎</div>';
-            separator.style.padding = '10px 16px';
-            separator.style.fontSize = '12px';
-            separator.style.opacity = '0.7';
-            separator.style.textAlign = 'center';
-            separator.style.borderTop = '1px solid var(--border-color)';
-            separator.style.marginTop = '8px';
-            separator.style.cursor = 'default';
-            engineMenu.appendChild(separator);
-            
-            // 添加自定义引擎
-            state.customEngines.forEach((engine, index) => {
-                const li = document.createElement('li');
-                li.setAttribute('role', 'option');
-                li.setAttribute('data-name', engine.name);
-                li.setAttribute('data-url', engine.url);
-                li.id = `engine-option-custom-${index}`;
-                
-                if (engineNameDisplay.textContent === engine.name) {
-                    li.classList.add('selected');
-                    li.setAttribute('aria-selected', 'true');
-                }
-                
-                li.innerHTML = `
-                    <div class="engine-info">
-                        <span class="engine-main">${engine.name}</span>
-                        <span class="engine-desc">${engine.domain}</span>
-                    </div>
-                `;
-                
-                li.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    updateEngineState(engine.name, engine.url);
-                    toggleMenu(false);
-                    input.focus();
-                });
-                
-                li.addEventListener('mouseenter', () => {
-                    state.activeIndex = state.searchEngines.length + index;
-                    updateMenuHighlight(Array.from(engineMenu.querySelectorAll('li')));
-                });
-                
-                engineMenu.appendChild(li);
-            });
-        }
     };
 
     // --- 优化4: 初始化引擎状态 ---
@@ -216,21 +263,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (savedEngineName && savedEngineUrl) {
             // 验证保存的引擎是否存在
-            const allEngines = [...state.searchEngines, ...state.customEngines];
+            const allEngines = getAllEngines();
             const foundEngine = allEngines.find(engine => 
                 engine.name === savedEngineName && engine.url === savedEngineUrl);
             
             if (foundEngine) {
                 updateEngineState(savedEngineName, savedEngineUrl);
             } else {
-                // 如果保存的引擎不存在，使用默认引擎
-                const defaultEngine = state.searchEngines[0];
-                updateEngineState(defaultEngine.name, defaultEngine.url);
+                // 如果保存的引擎不存在，使用第一个可用引擎
+                const firstEngine = allEngines[0];
+                if (firstEngine) {
+                    updateEngineState(firstEngine.name, firstEngine.url);
+                } else {
+                    // 如果没有任何引擎，添加默认的 Bing 引擎
+                    state.searchEngines = [
+                        { name: 'Bing', url: 'https://www.bing.com/search?q=', domain: 'bing.com', preset: true }
+                    ];
+                    updateEngineState('Bing', 'https://www.bing.com/search?q=');
+                }
             }
         } else {
             // 设置默认引擎
-            const defaultEngine = state.searchEngines[0];
-            updateEngineState(defaultEngine.name, defaultEngine.url);
+            const firstEngine = getAllEngines()[0];
+            if (firstEngine) {
+                updateEngineState(firstEngine.name, firstEngine.url);
+            }
         }
     };
 
@@ -252,49 +309,49 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('selectedEngineUrl', url);
     }
 
-// 替换原有的 showNotification 函数
-const showNotification = (content) => {
-    let notification = document.getElementById('notification');
-    if (!notification) {
-        notification = document.createElement('div');
-        notification.id = 'notification';
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--surface-color);
-            color: var(--text-color);
-            padding: 16px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1000;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: all 0.3s ease;
-            border: 1px solid var(--border-color);
-            font-size: 14px;
-            max-width: 400px;
-            word-break: break-word;
-        `;
-        document.body.appendChild(notification);
-    }
-    
-    // 判断内容类型，如果是 HTML 则使用 innerHTML，否则使用 textContent
-    if (typeof content === 'string' && content.includes('<')) {
-        notification.innerHTML = content;
-    } else {
-        notification.textContent = content;
-    }
-    
-    notification.style.opacity = '1';
-    notification.style.transform = 'translateY(0)';
-    
-    // 自动隐藏
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transform = 'translateY(-20px)';
-    }, 5000); // 增加显示时间到5秒，因为内容更复杂
-};
+    // 替换原有的 showNotification 函数
+    const showNotification = (content) => {
+        let notification = document.getElementById('notification');
+        if (!notification) {
+            notification = document.createElement('div');
+            notification.id = 'notification';
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--surface-color);
+                color: var(--text-color);
+                padding: 16px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 1000;
+                opacity: 0;
+                transform: translateY(-20px);
+                transition: all 0.3s ease;
+                border: 1px solid var(--border-color);
+                font-size: 14px;
+                max-width: 400px;
+                word-break: break-word;
+            `;
+            document.body.appendChild(notification);
+        }
+        
+        // 判断内容类型，如果是 HTML 则使用 innerHTML，否则使用 textContent
+        if (typeof content === 'string' && content.includes('<')) {
+            notification.innerHTML = content;
+        } else {
+            notification.textContent = content;
+        }
+        
+        notification.style.opacity = '1';
+        notification.style.transform = 'translateY(0)';
+        
+        // 自动隐藏
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateY(-20px)';
+        }, 5000); // 增加显示时间到5秒，因为内容更复杂
+    };
 
     // --- 优化6: 菜单开关逻辑 ---
     function toggleMenu(show) {
@@ -371,49 +428,54 @@ const showNotification = (content) => {
     });
 
     // --- 新增：处理自定义引擎命令 ---
-// 替换 handleCustomEngineCommand 函数中的 help 部分
-const handleCustomEngineCommand = (command) => {
-    const parts = command.trim().split(/\s+/);
-    const cmd = parts[0].substring(1).toLowerCase(); // 去掉开头的 '/'
-    const params = parts.slice(1);
-    
-    if (customEngineCommands[cmd]) {
-        customEngineCommands[cmd](params);
-        input.value = '';
-        debouncedToggleClearBtn();
-    } else if (cmd === 'help') {
-        const helpContent = `
-            <div style="line-height: 1.6;">
-                <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">自定义搜索引擎帮助</h3>
-                <div style="margin-bottom: 12px;">
-                    <div style="margin-bottom: 8px; display: flex;">
-                        <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; margin-right: 10px; flex-shrink: 0;">/add</code>
-                        <span>添加搜索引擎: <code>/add &lt;名称&gt; &lt;URL模板&gt; [域名]</code></span>
+    // 替换 handleCustomEngineCommand 函数中的 help 部分
+    const handleCustomEngineCommand = (command) => {
+        const parts = command.trim().split(/\s+/);
+        const cmd = parts[0].substring(1).toLowerCase(); // 去掉开头的 '/'
+        const params = parts.slice(1);
+        
+        if (customEngineCommands[cmd]) {
+            customEngineCommands[cmd](params);
+            input.value = '';
+            debouncedToggleClearBtn();
+        } else if (cmd === 'help') {
+            const helpContent = `
+                <div style="line-height: 1.6;">
+                    <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">自定义搜索引擎帮助</h3>
+                    <div style="margin-bottom: 12px;">
+                        <div style="margin-bottom: 8px; display: flex;">
+                            <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; margin-right: 10px; flex-shrink: 0;">/add</code>
+                            <span>添加搜索引擎: <code>/add &lt;名称&gt; &lt;URL模板&gt; [域名]</code></span>
+                        </div>
+                        <div style="margin-bottom: 8px; display: flex;">
+                            <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; margin-right: 10px; flex-shrink: 0;">/remove</code>
+                            <span>删除搜索引擎: <code>/remove &lt;名称&gt;</code></span>
+                        </div>
+                        <div style="margin-bottom: 8px; display: flex;">
+                            <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; margin-right: 10px; flex-shrink: 0;">/list</code>
+                            <span>列出所有搜索引擎</span>
+                        </div>
+                        <div style="margin-bottom: 8px; display: flex;">
+                            <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; margin-right: 10px; flex-shrink: 0;">/reset</code>
+                            <span>重置为默认搜索引擎</span>
+                        </div>
+                        <div style="margin-bottom: 8px; display: flex;">
+                            <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; margin-right: 10px; flex-shrink: 0;">/help</code>
+                            <span>显示此帮助信息</span>
+                        </div>
                     </div>
-                    <div style="margin-bottom: 8px; display: flex;">
-                        <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; margin-right: 10px; flex-shrink: 0;">/remove</code>
-                        <span>删除搜索引擎: <code>/remove &lt;名称&gt;</code></span>
-                    </div>
-                    <div style="margin-bottom: 8px; display: flex;">
-                        <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; margin-right: 10px; flex-shrink: 0;">/list</code>
-                        <span>列出所有自定义引擎</span>
-                    </div>
-                    <div style="margin-bottom: 8px; display: flex;">
-                        <code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; margin-right: 10px; flex-shrink: 0;">/help</code>
-                        <span>显示此帮助信息</span>
+                    <div style="font-size: 13px; opacity: 0.8;">
+                        <p style="margin: 8px 0;">提示：URL模板中请使用 <code style="background: rgba(0,0,0,0.1); padding: 2px 4px; border-radius: 3px;">{query}</code> 作为查询占位符</p>
+                        <p style="margin: 8px 0;">例如: <code style="background: rgba(0,0,0,0.1); padding: 2px 4px; border-radius: 3px; word-break: break-all;">/add GitHub https://github.com/search?q={query}</code></p>
+                        <p style="margin: 8px 0;">例如: <code style="background: rgba(0,0,0,0.1); padding: 2px 4px; border-radius: 3px; word-break: break-all;">/remove GitHub</code></p>
                     </div>
                 </div>
-                <div style="font-size: 13px; opacity: 0.8;">
-                    <p style="margin: 8px 0;">提示：URL模板中请使用 <code style="background: rgba(0,0,0,0.1); padding: 2px 4px; border-radius: 3px;">{query}</code> 作为查询占位符</p>
-                    <p style="margin: 8px 0;">例如: <code style="background: rgba(0,0,0,0.1); padding: 2px 4px; border-radius: 3px; word-break: break-all;">/add GitHub https://github.com/search?q={query}</code></p>
-                </div>
-            </div>
-        `;
-        showNotification(helpContent);
-    } else {
-        showNotification(`未知命令: /${cmd}\n输入 /help 查看可用命令`);
-    }
-};
+            `;
+            showNotification(helpContent);
+        } else {
+            showNotification(`未知命令: /${cmd}\n输入 /help 查看可用命令`);
+        }
+    };
 
     function updateMenuHighlight(items) {
         items.forEach((item, index) => {
@@ -486,66 +548,66 @@ const handleCustomEngineCommand = (command) => {
     initializeEngine();
     debouncedToggleClearBtn();
 
-// ... 之前的代码保持不变 ...
+    // ... 之前的代码保持不变 ...
 
-// --- 优化11: 提交搜索逻辑 ---
-// 替换 script.js 中的表单提交处理部分
-form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const query = input.value.trim();
-    if (!query) return;
+    // --- 优化11: 提交搜索逻辑 ---
+    // 替换 script.js 中的表单提交处理部分
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const query = input.value.trim();
+        if (!query) return;
 
-    // 如果是命令，处理命令而不是搜索
-    if (query.startsWith('/')) {
-        handleCustomEngineCommand(query);
-        return;
-    }
+        // 如果是命令，处理命令而不是搜索
+        if (query.startsWith('/')) {
+            handleCustomEngineCommand(query);
+            return;
+        }
 
-    const searchBtn = form.querySelector('.search-button');
-    searchBtn.classList.add('is-loading');
+        const searchBtn = form.querySelector('.search-button');
+        searchBtn.classList.add('is-loading');
 
-    let targetUrl = "";
+        let targetUrl = "";
 
-    const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
-    if (urlPattern.test(query)) {
-        targetUrl = query.startsWith('http') ? query : `https://${query}`;
-    } 
-    else {
-        const parts = query.split(/\s+/);
-        const prefix = parts[0].toLowerCase();
-        if (directShortcuts[prefix] && parts.length > 1) {
-            const keyword = query.substring(parts[0].length).trim();
-            targetUrl = directShortcuts[prefix].url + encodeURIComponent(keyword);
+        const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+        if (urlPattern.test(query)) {
+            targetUrl = query.startsWith('http') ? query : `https://${query}`;
         } 
         else {
-            // 检查当前是否为自定义引擎，并且URL包含{query}占位符
-            const currentEngine = [...state.searchEngines, ...state.customEngines]
-                .find(engine => engine.name === engineNameDisplay.textContent);
-            
-            if (currentEngine && currentEngine.url.includes('{query}')) {
-                targetUrl = currentEngine.url.replace(/{query}/g, encodeURIComponent(query));
-            } else {
-                // 使用当前保存的搜索URL（对于预设引擎）
-                targetUrl = state.currentSearchUrl + encodeURIComponent(query);
+            const parts = query.split(/\s+/);
+            const prefix = parts[0].toLowerCase();
+            if (directShortcuts[prefix] && parts.length > 1) {
+                const keyword = query.substring(parts[0].length).trim();
+                targetUrl = directShortcuts[prefix].url + encodeURIComponent(keyword);
+            } 
+            else {
+                // 检查当前是否为自定义引擎，并且URL包含{query}占位符
+                const currentEngine = getAllEngines()
+                    .find(engine => engine.name === engineNameDisplay.textContent);
+                
+                if (currentEngine && currentEngine.url.includes('{query}')) {
+                    targetUrl = currentEngine.url.replace(/{query}/g, encodeURIComponent(query));
+                } else {
+                    // 使用当前保存的搜索URL（对于预设引擎）
+                    targetUrl = state.currentSearchUrl + encodeURIComponent(query);
+                }
             }
         }
-    }
 
-    // 模拟网络延迟
-    setTimeout(() => {
-        try {
-            window.open(targetUrl, '_blank');
-        } catch (error) {
-            console.error('无法打开搜索结果:', error);
-            showNotification('无法打开搜索结果，请检查URL格式');
-        } finally {
-            searchBtn.classList.remove('is-loading');
-        }
-    }, 300); 
-});
+        // 模拟网络延迟
+        setTimeout(() => {
+            try {
+                window.open(targetUrl, '_blank');
+            } catch (error) {
+                console.error('无法打开搜索结果:', error);
+                showNotification('无法打开搜索结果，请检查URL格式');
+            } finally {
+                searchBtn.classList.remove('is-loading');
+            }
+        }, 300); 
+    });
 
-// ... 之后的代码保持不变 ...
+    // ... 之后的代码保持不变 ...
     
     // --- 深色模式切换支持 ---
     const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
