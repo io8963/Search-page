@@ -2,14 +2,14 @@
     --primary-color-light: #1A797F;
     --primary-color-dark: #1A797F; /* 改为与浅色相同的颜色 */
     --primary-color: var(--primary-color-light);
-    --direct-color: #4299e1; /* 直达模式的颜色（橙色） */
+    --direct-color: #4299e1; /* 直达模式的颜色 */
     --btn-text-color: #ffffff;
 
     --text-color-light: #333; 
-    --surface-color-light: rgba(255, 255, 255, 0.75); 
-    --border-color-light: rgba(0, 0, 0, 0.08);   
+    --surface-color-light: rgba(255, 255, 255, 0.85); 
+    --border-color-light: rgba(0, 0, 0, 0.1);   
     --hover-color-light: rgba(0, 0, 0, 0.05);
-    --shadow-light: 0 8px 32px rgba(31, 38, 135, 0.10);
+    --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.1);
     
     --placeholder-opacity: 0.5;
     --hint-opacity: 0.8;
@@ -21,8 +21,8 @@
     --box-shadow: var(--shadow-light);
     
     --search-radius: 40px; 
-    --backdrop-blur: 15px;
-    --transition-speed: 0.5s;
+    --backdrop-blur: 10px;
+    --transition-speed: 0.3s;
     
     /* 优化：添加焦点边框颜色 */
     --focus-border-color: var(--primary-color);
@@ -30,17 +30,17 @@
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --primary-color: var(--primary-color-dark); /* 现在与浅色相同 */
-        --text-color: #ffffff; 
-        --surface-color: rgba(30, 35, 45, 0.70); 
-        --border-color: rgba(255, 255, 255, 0.12); 
+        --primary-color: var(--primary-color-dark);
+        --text-color: #e2e8f0; 
+        --surface-color: rgba(30, 41, 59, 0.85); 
+        --border-color: rgba(255, 255, 255, 0.15); 
         --hover-color: rgba(255, 255, 255, 0.1);
-        --box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-        --backdrop-blur: 30px;   
-        --hint-opacity: 0.5;
+        --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        --backdrop-blur: 10px;   
+        --hint-opacity: 0.6;
         
-        /* 优化：深色模式下更明显的焦点边框 */
-        --focus-border-color: #1A797F; /* 使用相同的主题色 */
+        /* 深色模式下更明显的焦点边框 */
+        --focus-border-color: #38b2ac;
     }
 }
 
@@ -57,30 +57,18 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    background-attachment: fixed;
+    background-color: #f0f2f5; /* 简化背景为纯色 */
+    background-image: radial-gradient(#d1d5db 1px, transparent 1px); /* 轻微纹理 */
+    background-size: 30px 30px; /* 降低纹理密度 */
     overflow-x: hidden;
-    transition: background var(--transition-speed) ease-in-out;
-}
-
-body::before {
-    content: ""; 
-    position: fixed; 
-    inset: 0; 
-    z-index: -1;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #3a506b 100%);
-    background-attachment: fixed; 
-    opacity: 0;
-    transition: opacity var(--transition-speed) ease-in-out;
+    transition: background-color var(--transition-speed) ease-in-out;
 }
 
 @media (prefers-color-scheme: dark) { 
     body { 
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #3a506b 100%);
+        background-color: #111827; /* 深色模式纯色背景 */
+        background-image: radial-gradient(#374151 1px, transparent 1px);
     }
-    body::before { 
-        opacity: 1; 
-    } 
 }
 
 .search-container { 
@@ -99,7 +87,7 @@ body::before {
     border: 1px solid var(--border-color);
     border-radius: var(--search-radius); 
     box-shadow: var(--box-shadow);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.3s ease;
     position: relative;
     height: 64px;
     padding-right: 0; 
@@ -109,15 +97,15 @@ body::before {
 
 .search-form:focus-within {
     border-color: var(--focus-border-color);
-    transform: scale(1.01); 
-    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.1);
+    transform: scale(1.02); 
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 
 /* 深色模式下更明显的焦点状态 */
 @media (prefers-color-scheme: dark) {
     .search-form:focus-within {
         border-color: var(--focus-border-color);
-        box-shadow: 0 15px 45px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
     }
 }
 
@@ -133,7 +121,7 @@ body::before {
 
 .search-form.direct-mode .direct-badge {
     display: flex; /* 显示文字标签 */
-    animation: badgePop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: badgePop 0.3s ease;
 }
 
 .search-form.direct-mode .search-input {
@@ -229,7 +217,7 @@ input[type="search"]::-webkit-search-results-decoration {
 .arrow-icon {
     font-size: 18px; 
     opacity: 0.5;
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform 0.3s ease;
     flex-shrink: 0;
 }
 
@@ -242,14 +230,14 @@ input[type="search"]::-webkit-search-results-decoration {
 .engine-menu {
     display: none; 
     position: absolute; 
-    top: calc(100% + 12px); 
+    top: calc(100% + 8px); 
     left: 0;
-    min-width: 190px; 
+    min-width: 200px; 
     background-color: var(--surface-color);
-    backdrop-filter: blur(40px); 
+    backdrop-filter: blur(10px); 
     border: 1px solid var(--border-color);
-    border-radius: 20px; 
-    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    border-radius: 16px; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     padding: 8px; 
     z-index: 100; 
     list-style: none;
@@ -260,26 +248,26 @@ input[type="search"]::-webkit-search-results-decoration {
 
 .engine-menu.active { 
     display: block; 
-    animation: menuShow 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+    animation: menuShow 0.25s ease forwards; 
 }
 
 @keyframes menuShow {
     from { 
         opacity: 0; 
-        transform: scale(0.95) translateY(-15px) rotateX(10deg); 
+        transform: scale(0.95) translateY(-10px); 
     }
     to { 
         opacity: 1; 
-        transform: scale(1) translateY(0) rotateX(0); 
+        transform: scale(1) translateY(0); 
     }
 }
 
 .engine-menu li {
     position: relative;
     padding: 12px 16px; 
-    border-radius: 14px; 
+    border-radius: 12px; 
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     display: flex; 
     align-items: center;
     margin-bottom: 2px;
@@ -287,7 +275,7 @@ input[type="search"]::-webkit-search-results-decoration {
 }
 
 .engine-menu.active li {
-    animation: itemSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: itemSlideIn 0.2s ease forwards;
 }
 
 .engine-menu.active li:nth-child(1) { 
@@ -303,7 +291,7 @@ input[type="search"]::-webkit-search-results-decoration {
 }
 
 @keyframes itemSlideIn {
-    from { opacity: 0; transform: translateX(-10px); }
+    from { opacity: 0; transform: translateX(-8px); }
     to { opacity: 1; transform: translateX(0); }
 }
 
@@ -352,8 +340,8 @@ input[type="search"]::-webkit-search-results-decoration {
 
 .engine-desc { 
     font-size: 11px; 
-    opacity: 0.5; 
-    font-family: monospace; 
+    opacity: 0.6; 
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -410,9 +398,9 @@ input[type="search"]::-webkit-search-results-decoration {
 @media (prefers-color-scheme: dark) {
     .shortcut-hint { 
         background-color: rgba(255, 255, 255, 0.1); 
-        border-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.15);
         border-bottom-color: rgba(255, 255, 255, 0.2);
-        color: #e2e8f0; /* 更亮的文字颜色 */
+        color: #cbd5e0; /* 更亮的文字颜色 */
     }
 }
 
@@ -428,7 +416,7 @@ input[type="search"]::-webkit-search-results-decoration {
     justify-content: center;
     color: var(--text-color);
     cursor: pointer; 
-    font-size: 22px; 
+    font-size: 20px; 
     line-height: 1;  
     border-radius: 50%;
     flex-shrink: 0;
@@ -440,7 +428,7 @@ input[type="search"]::-webkit-search-results-decoration {
     height: 36px; 
     margin-right: 0;
     pointer-events: none;
-    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.2s ease, margin-right 0.2s ease, background-color 0.2s ease;
+    transition: opacity 0.2s ease, transform 0.2s ease, width 0.2s ease, margin-right 0.2s ease, background-color 0.2s ease;
 }
 
 .clear-btn span { 
@@ -449,7 +437,7 @@ input[type="search"]::-webkit-search-results-decoration {
 }
 
 .clear-btn.visible {
-    opacity: 0.4;
+    opacity: 0.6;
     transform: scale(1);
     width: 36px; 
     margin-right: 10px;
@@ -478,13 +466,13 @@ input[type="search"]::-webkit-search-results-decoration {
     color: white;
     border: none;
     padding: 0 25px; 
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     
-    height: calc(100% + 2px); 
-    margin: -1px -1px -1px 0;
+    height: calc(100% - 4px); 
+    margin: 2px 2px 2px 0;
     border-radius: 0 var(--search-radius) var(--search-radius) 0;
     
     flex-shrink: 0;
@@ -495,6 +483,7 @@ input[type="search"]::-webkit-search-results-decoration {
 
 .search-button:hover { 
     background-color: #156268; 
+    transform: scale(1.02);
 }
 
 /* 深色模式下更合适的按钮悬停效果 */
@@ -509,7 +498,7 @@ input[type="search"]::-webkit-search-results-decoration {
 }
 
 .search-button span {
-    font-size: 20px;
+    font-size: 18px;
     margin: 0;
     transform: translateY(1px); 
 }
@@ -517,72 +506,23 @@ input[type="search"]::-webkit-search-results-decoration {
 /* 增强触摸设备体验 */
 @media (hover: none) and (pointer: coarse) {
     .clear-btn {
-        width: 44px;
-        height: 44px;
-        min-width: 44px;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
     }
     
     .engine-menu li {
-        min-height: 44px;
-        padding: 12px 16px;
+        min-height: 48px;
+        padding: 14px 16px;
     }
 }
 
+/* 低分辨率屏幕优化 */
 @media (max-width: 768px) {
-    .search-form { 
-        height: 56px; 
-        min-height: 56px;
+    body {
+        padding: 10px;
     }
     
-    #current-engine-name, 
-    .button-text { 
-        display: none; 
-    }
-    
-    .engine-select-wrapper { 
-        border-right: none; 
-        width: auto; 
-        min-width: 44px;
-        justify-content: center;
-    }
-    
-    .current-engine { 
-        padding: 0;
-        justify-content: center;
-    }
-    
-    .direct-badge { 
-        padding: 0 10px 0 15px; 
-        font-size: 14px;
-    }
-
-    .search-button { 
-        width: 44px; 
-        height: 44px; 
-        padding: 0; 
-        justify-content: center; 
-        border-radius: 50%; 
-        margin: 0 6px 0 0; 
-        align-self: center;
-        min-width: 44px;
-    }
-    
-    .shortcut-hint { 
-        display: none; 
-    }
-    
-    .clear-btn.visible { 
-        margin-right: 5px; 
-        width: 36px;
-        height: 36px;
-    }
-    
-    .search-input {
-        padding: 0 15px;
-    }
-}
-
-@media (max-width: 768px) {
     .search-form { 
         height: 56px; 
         min-height: 56px;
@@ -600,7 +540,7 @@ input[type="search"]::-webkit-search-results-decoration {
         width: auto; 
         min-width: 44px;
         justify-content: center;
-        /* 移动端时变成圆形，与右侧搜索按钮一致 */
+        /* 移动端时变成半圆形，与右侧搜索按钮一致 */
         border-radius: 50%;
         margin: 0 6px 0 8px;
         /* 确保高度和宽度一致 */
@@ -651,6 +591,26 @@ input[type="search"]::-webkit-search-results-decoration {
     }
 }
 
+/* 高分辨率屏幕优化 */
+@media (min-width: 1200px) {
+    .search-form {
+        height: 70px;
+    }
+    
+    .search-input {
+        font-size: 18px;
+    }
+    
+    .search-button {
+        padding: 0 30px;
+        font-size: 18px;
+    }
+    
+    .search-button span {
+        font-size: 20px;
+    }
+}
+
 /* 搜索按钮加载状态 */
 .search-button.is-loading .button-text {
     display: none; 
@@ -670,9 +630,9 @@ input[type="search"]::-webkit-search-results-decoration {
 
 .search-button.is-loading::after {
     content: "";
-    width: 20px;
-    height: 20px;
-    border: 3px solid transparent;
+    width: 18px;
+    height: 18px;
+    border: 2px solid transparent;
     border-top-color: rgba(255,255,255,0.3);
     border-right-color: rgba(255,255,255,0.6);
     border-bottom-color: white;
@@ -690,12 +650,6 @@ input[type="search"]::-webkit-search-results-decoration {
     }
 }
 
-@keyframes spin { 
-    to { 
-        transform: rotate(360deg); 
-    } 
-}
-
 /* 新增：通知样式 */
 #notification {
     position: fixed;
@@ -703,7 +657,7 @@ input[type="search"]::-webkit-search-results-decoration {
     right: 20px;
     background: var(--surface-color);
     color: var(--text-color);
-    padding: 12px 20px;
+    padding: 14px 20px;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     z-index: 1000;
@@ -712,14 +666,14 @@ input[type="search"]::-webkit-search-results-decoration {
     transition: all 0.3s ease;
     border: 1px solid var(--border-color);
     font-size: 14px;
-    max-width: 300px;
+    max-width: 400px;
     word-break: break-word;
 }
 
 /* 深色模式下的通知样式 */
 @media (prefers-color-scheme: dark) {
     #notification {
-        background: rgba(30, 35, 45, 0.95);
+        background: rgba(30, 41, 59, 0.95);
         border-color: rgba(255, 255, 255, 0.2);
     }
 }
@@ -735,9 +689,9 @@ input[type="search"]::-webkit-search-results-decoration {
 
 /* 修复图标撑破布局问题 */
 .material-symbols-outlined {
-    font-size: 24px;
-    width: 24px;
-    height: 24px;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -749,7 +703,7 @@ input[type="search"]::-webkit-search-results-decoration {
     width: 18px;
     height: 18px;
     opacity: 0.5;
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform 0.3s ease;
     flex-shrink: 0;
 }
 
@@ -763,13 +717,13 @@ input[type="search"]::-webkit-search-results-decoration {
 
 .current-engine .material-symbols-outlined {
     flex-shrink: 0;
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
 }
 
 .search-button span.material-symbols-outlined {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
     margin: 0;
     transform: translateY(1px); 
     display: flex;
@@ -780,9 +734,9 @@ input[type="search"]::-webkit-search-results-decoration {
 .clear-btn span {
     display: block; 
     line-height: 1; 
-    font-size: 22px;
-    width: 22px;
-    height: 22px;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
