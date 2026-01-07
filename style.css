@@ -462,17 +462,17 @@ input[type="search"]::-webkit-search-results-decoration {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--primary-color);
-    color: white;
+    background-color: var(--primary-color); /* 使用主题色作为背景 */
+    color: #ffffff; /* 固定白色文字，确保可读性 */
     border: none;
     padding: 0 25px; 
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
     
-    height: calc(100% - 4px); 
-    margin: 2px 2px 2px 0;
+    height: calc(100% + 2px); 
+    margin: -1px -1px -1px 0;
     border-radius: 0 var(--search-radius) var(--search-radius) 0;
     
     flex-shrink: 0;
@@ -482,8 +482,7 @@ input[type="search"]::-webkit-search-results-decoration {
 }
 
 .search-button:hover { 
-    background-color: #156268; 
-    transform: scale(1.02);
+    background-color: #156268; /* 悬停时使用更深的主题色 */
 }
 
 /* 深色模式下更合适的按钮悬停效果 */
