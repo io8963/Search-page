@@ -1,57 +1,78 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Search</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简约搜索主页</title>
     <link rel="stylesheet" href="style.css">
-    <!-- 预加载图标字体以提升性能 -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" as="style">
+    
+    <!-- 字体预加载优化 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block"></noscript>
 </head>
 <body>
-    <!-- 右上角设置入口（新增） -->
-    <div id="settings-trigger" class="top-right-settings">⚙️ 设置</div>
-
     <main class="search-container">
-        <!-- 搜索表单 -->
-        <form id="searchForm" class="search-form">
-            <input
-                type="text"
-                id="searchInput"
-                class="search-input"
-                placeholder="输入搜索关键词..."
-                autocomplete="off"
-                spellcheck="false"
-            />
-            <button type="submit" class="search-button">
+        <form id="search-form" class="search-form" role="search">
+            
+            <div class="engine-select-wrapper" id="engine-trigger" role="button" aria-haspopup="true" aria-expanded="false" aria-label="切换搜索引擎">
+                <!-- 默认搜索引擎显示 -->
+                <div class="current-engine" id="current-engine-ui">
+                    <span id="current-engine-name">Bing</span>
+                    <span class="material-symbols-outlined arrow-icon">expand_more</span>
+                </div>
+
+                <!-- 直达模式标签显示 -->
+                <div id="direct-badge" class="direct-badge">GitHub</div>
+
+                <ul id="engine-menu" class="engine-menu" role="listbox" aria-label="搜索引擎选择">
+                    <li role="option" data-name="Bing" data-url="https://www.bing.com/search?q=" class="selected" id="engine-option-0" aria-selected="true">
+                        <div class="engine-info">
+                            <span class="engine-main">Bing</span>
+                            <span class="engine-desc">bing.com</span>
+                        </div>
+                    </li>
+                    <li role="option" data-name="Google" data-url="https://www.google.com/search?q=" id="engine-option-1" aria-selected="false">
+                        <div class="engine-info">
+                            <span class="engine-main">Google</span>
+                            <span class="engine-desc">google.com</span>
+                        </div>
+                    </li>
+                    <li role="option" data-name="Baidu" data-url="https://www.baidu.com/s?wd=" id="engine-option-2" aria-selected="false">
+                        <div class="engine-info">
+                            <span class="engine-main">Baidu</span>
+                            <span class="engine-desc">baidu.com</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            
+            <input 
+                type="search" 
+                id="search-input" 
+                class="search-input" 
+                placeholder="搜索..." 
+                autocomplete="off" 
+                inputmode="search"
+                enterkeyhint="search"
+                required
+                autofocus
+            >
+
+            <div class="shortcut-hint" aria-hidden="true">/</div>
+
+            <div id="clear-btn" class="clear-btn" role="button" aria-label="清除输入" tabindex="0">
+                <span class="material-symbols-outlined">cancel</span>
+            </div>
+            
+            <button type="submit" class="search-button" aria-label="执行搜索">
+                <span class="button-text">搜索</span>
                 <span class="material-symbols-outlined">search</span>
             </button>
         </form>
-
-        <!-- 当前搜索引擎信息展示 -->
-        <div class="engine-info">
-            <span id="engineNameDisplay" class="engine-name"></span>
-            <span id="engineDomainDisplay" class="engine-domain"></span>
-        </div>
-
-        <!-- 通知区域 -->
-        <div id="notification" class="notification"></div>
     </main>
-
-    <!-- 悬浮设置面板（新增） -->
-    <div id="settings-panel" class="settings-panel">
-        <div class="settings-header">
-            <h3>管理搜索引擎</h3>
-            <span id="close-settings" class="material-symbols-outlined close-btn">close</span>
-        </div>
-        <div class="settings-body">
-            <ul id="engine-list" class="engine-list"></ul>
-            <div id="empty-state" class="empty-state" style="display: none;">
-                <p>暂无自定义引擎</p>
-            </div>
-        </div>
-    </div>
-    <!-- 遮罩层（新增） -->
-    <div id="settings-backdrop" class="settings-backdrop" style="display: none;"></div>
-
-    <script src="script.js">
+    
+    <script src="script.js"></script>
+</body>
+</html>
